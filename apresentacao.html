@@ -123,7 +123,8 @@ body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(-
 /* ===== CELULAR (≤900px): cada cena = UMA tela cheia. Texto legível em cima, demo(s) de PC encaixadas escaladas (JS preenche o scale). ===== */
 .mfit{display:contents}
 @media (max-width:900px){
-  .scene,.split,.split.rev,.duo{min-height:100svh;height:100svh;overflow:hidden}
+  html{scroll-snap-type:y mandatory} /* cada deslize encaixa numa cena cheia */
+  .scene,.split,.split.rev,.duo{min-height:100svh;height:100svh;overflow:hidden;scroll-snap-align:start;scroll-snap-stop:always}
   /* cenas full-bleed (1 demo grande, título já vem dentro): centraliza a moldura */
   section.scene[style*="display:block"]{display:flex!important;flex-direction:column;align-items:center;justify-content:center;padding:10px!important}
 
@@ -785,6 +786,7 @@ function initNarracao(){
   const fallbackMs=(id)=> id==='magus-finale'?6000 : TRANSICAO.has(id)?250 : 1200;
 
   let i=0, audio=null, timer=null, paused=false, started=false;
+  let navLock=false, navLockT=null; // trava enquanto o motor rola sozinho, pra não brigar com o observador de scroll manual
   const video=document.getElementById('abertura-video');
   const btn=document.getElementById('pp-btn');
   const navbar=document.getElementById('navbar'), navFill=document.getElementById('nav-fill');
@@ -842,7 +844,7 @@ function initNarracao(){
   function clearTimer(){ if(timer){clearTimeout(timer);timer=null;} }
   function stopAudio(){ if(audio){audio.onended=null;audio.onerror=null;try{audio.pause();}catch(e){} audio=null;} }
 
-  function play(n){
+  function play(n, noScroll){
     stopAudio(); clearTimer();
     i=n;
     if(n>=ORDER.length){ clockStop(); if(navFill)navFill.style.width='100%'; if(RENDER) window.__ended=true; return; }
@@ -851,7 +853,7 @@ function initNarracao(){
     if(navFill) navFill.style.width=((n+1)/ORDER.length*100).toFixed(1)+'%';
     clockSync(n);
     const sec=document.getElementById(id);
-    if(sec) sec.scrollIntoView({behavior:'smooth',block:'start'});
+    if(sec && !noScroll){ navLock=true; clearTimeout(navLockT); navLockT=setTimeout(()=>{navLock=false;},850); sec.scrollIntoView({behavior:'smooth',block:'start'}); }
     manageIframes(id); // carrega só a cena atual, descarrega as outras (libera CPU)
 
     let done=false;
@@ -913,6 +915,28 @@ function initNarracao(){
   if(navPrev) navPrev.addEventListener('click',()=>{ paused=false; setBtn(); play(Math.max(0,i-1)); });
   if(navNext) navNext.addEventListener('click',()=>{ paused=false; setBtn(); play(Math.min(ORDER.length-1,i+1)); });
   setBtn();
+
+  // OBSERVADOR DE SCROLL MANUAL: se o usuário desliza pra outra cena por conta própria,
+  // detecta qual cena dominou a tela → carrega o iframe + toca a narração dela (igual ao automático).
+  // navLock evita brigar com o scroll que o próprio motor dispara no avanço automático.
+  try{
+    const ratios={};
+    const sceneEls=ORDER.map(id=>document.getElementById(id)).filter(Boolean);
+    let settleT=null;
+    const io=new IntersectionObserver((entries)=>{
+      entries.forEach(e=>{ ratios[e.target.id]=e.intersectionRatio; });
+      if(!started||navLock||paused||RENDER) return;
+      clearTimeout(settleT);
+      settleT=setTimeout(()=>{
+        if(!started||navLock||paused) return;
+        let topId=null, topR=0.55; // a cena precisa ocupar >55% da tela pra contar como "estou aqui"
+        for(const id in ratios){ if(ratios[id]>topR){ topR=ratios[id]; topId=id; } }
+        if(topId){ const n=ORDER.indexOf(topId); if(n>=0 && n!==i){ play(n, true); } } // true = não rola (o dedo já rolou)
+      },140); // espera o swipe assentar antes de decidir
+    },{threshold:[0,0.25,0.5,0.55,0.7,0.85,1]});
+    sceneEls.forEach(el=>io.observe(el));
+  }catch(e){}
+
   // MODO "SÓ UMA CENA" (?only=ID): mostra uma cena parada pra eu gravar cada uma no tempo exato
   const ONLY=new URLSearchParams(location.search).get('only');
   if(ONLY){
