@@ -123,11 +123,11 @@ body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(-
 /* ===== CELULAR (≤900px): cada cena = UMA tela cheia. Texto legível em cima, demo(s) de PC encaixadas escaladas (JS preenche o scale). ===== */
 .mfit{display:contents}
 @media (max-width:900px){
-  /* TRAVADO: sem rolagem manual. Só a cena ativa aparece (tela cheia); o avanço é só pela narração. */
-  html,body{overflow:hidden!important;height:100svh;touch-action:none;overscroll-behavior:none;scroll-snap-type:none}
-  .scene,.split,.split.rev,.duo{min-height:100svh;height:100svh;overflow:hidden;scroll-snap-align:none}
-  section[id]:not(.active){display:none!important}
-  section[id].active{position:fixed!important;inset:0!important;z-index:1}
+  /* TRAVADO (sem quebrar animação): o DEDO não rola (touch-action:none + JS preventDefault),
+     mas o motor ainda rola sozinho na ordem dos áudios. Layout/animação = igual antes (rolável), só sem rolagem manual.
+     NÃO usar overflow:hidden (o motor precisa rolar via scrollIntoView) nem display:none/position:fixed (quebra as animações dos demos). */
+  html{touch-action:none;overscroll-behavior-y:none}
+  .scene,.split,.split.rev,.duo{min-height:100svh;height:100svh;overflow:hidden}
   .scroll-hint{display:none!important} /* travado: nada de "role" */
   /* cenas full-bleed (1 demo grande, título já vem dentro): centraliza a moldura */
   section.scene[style*="display:block"]{display:flex!important;flex-direction:column;align-items:center;justify-content:center;padding:10px!important}
@@ -857,7 +857,6 @@ function initNarracao(){
     if(navFill) navFill.style.width=((n+1)/ORDER.length*100).toFixed(1)+'%';
     clockSync(n);
     const sec=document.getElementById(id);
-    document.querySelectorAll('section[id]').forEach(s=>s.classList.toggle('active', s.id===id)); // no celular só a cena ativa aparece (travado)
     if(sec && !noScroll){ navLock=true; clearTimeout(navLockT); navLockT=setTimeout(()=>{navLock=false;},850); sec.scrollIntoView({behavior:'smooth',block:'start'}); }
     manageIframes(id); // carrega só a cena atual, descarrega as outras (libera CPU)
 
@@ -942,12 +941,17 @@ function initNarracao(){
     sceneEls.forEach(el=>io.observe(el));
   }catch(e){}
 
+  // TRAVA DO DEDO NO CELULAR: bloqueia o usuário de rolar/adiantar; o motor ainda rola sozinho (scrollIntoView é programático, não é gesto, então não é bloqueado).
+  const isMobile=()=>window.matchMedia('(max-width:900px)').matches;
+  document.addEventListener('touchmove', e=>{ if(isMobile()&&!RENDER) e.preventDefault(); }, {passive:false});
+  document.addEventListener('wheel', e=>{ if(isMobile()&&!RENDER) e.preventDefault(); }, {passive:false});
+  document.addEventListener('keydown', e=>{ if(isMobile()&&['ArrowUp','ArrowDown','PageUp','PageDown',' ','Home','End'].includes(e.key)) e.preventDefault(); });
+
   // MODO "SÓ UMA CENA" (?only=ID): mostra uma cena parada pra eu gravar cada uma no tempo exato
   const ONLY=new URLSearchParams(location.search).get('only');
   if(ONLY){
     if(ov) ov.style.display='none';
     if(clockBox) clockBox.style.display='none';
-    document.querySelectorAll('section[id]').forEach(s=>s.classList.toggle('active', s.id===ONLY));
     manageIframes(ONLY);
     const s=document.getElementById(ONLY); if(s) s.scrollIntoView({block:'start'});
     if(ONLY==='abertura'&&video){ video.loop=false; video.muted=true; try{video.currentTime=0;}catch(e){} video.play().catch(()=>{}); }
