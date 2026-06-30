@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <defs>
+    <linearGradient id="f360g" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00C38A"/>
+      <stop offset="100%" stop-color="#008F6C"/>
+    </linearGradient>
+  </defs>
+  <rect width="120" height="120" rx="22" fill="url(#f360g)"/>
+  <text x="60" y="73" text-anchor="middle" font-family="-apple-system, 'Segoe UI', Inter, Arial, sans-serif" font-weight="800" font-size="34" fill="#ffffff" letter-spacing="-1">
+    F360
+  </text>
+  <circle cx="60" cy="90" r="2.5" fill="#ffffff" opacity="0.75"/>
+</svg>
