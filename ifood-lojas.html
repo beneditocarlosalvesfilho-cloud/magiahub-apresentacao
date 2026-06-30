@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — iFood: horários e pausas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--surface-muted:#F3EEE6;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--plum:#3D2F66;--plum-deep:#2A1F4F;--gold:#E7B43B;--gold-2:#f4c84b;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--warning:#A16207;--warning-bg:#FEF3C7;--danger:#B91C1C;--info:#1D4ED8;
+  --ifood:#EA1D2C;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;overflow:hidden}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.92}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 24px}
+
+.scene-head{display:flex;flex-direction:column;gap:7px}
+.toprow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ifood);padding:5px 12px;border-radius:var(--r-full);border:1px solid color-mix(in srgb,var(--ifood) 35%,var(--border));background:color-mix(in srgb,var(--ifood) 9%,transparent)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--ifood);animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ifood) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.oficial{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--success);
+  background:var(--success-bg);border:1px solid color-mix(in srgb,var(--success) 38%,transparent);border-radius:var(--r-full);padding:6px 14px;position:relative;overflow:hidden}
+.oficial .ck{font-size:14px}
+.oficial::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 40%,rgba(255,255,255,.5) 50%,transparent 60%);transform:translateX(-100%);animation:shine 4s ease-in-out 1.2s infinite}
+@keyframes shine{0%{transform:translateX(-100%)}45%,100%{transform:translateX(100%)}}
+.scene-title{font-family:"Anton";font-size:clamp(24px,3.2vw,42px);text-transform:uppercase;margin-top:2px}
+.scene-title .hl{color:var(--ifood)}
+.scene-sub{font-size:13.5px;color:var(--fg-2);line-height:1.45;max-width:720px}
+.scene-sub b{color:var(--plum)}
+
+.appwin{position:relative;margin-top:12px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 280px);min-height:400px;max-height:640px;display:flex;flex-direction:column}
+
+/* topbar: seletor de loja + abas */
+.bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;border-bottom:1px solid var(--border)}
+.lojasel{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:13px;color:var(--plum);
+  background:color-mix(in srgb,var(--ifood) 8%,transparent);border:1px solid color-mix(in srgb,var(--ifood) 30%,transparent);border-radius:10px;padding:8px 13px}
+.lojasel .star{color:var(--ifood)}
+.tabs{display:inline-flex;gap:4px;background:var(--surface-muted);border-radius:10px;padding:3px}
+.tab{display:inline-flex;align-items:center;gap:6px;font-weight:800;font-size:12.5px;color:var(--fg-2);padding:7px 13px;border-radius:10px;cursor:pointer;border:none;background:transparent;font-family:inherit}
+.tab.on{background:var(--surface);color:var(--ifood);box-shadow:0 2px 6px rgba(40,31,79,.10)}
+.aviso{margin-left:auto;display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:700;color:var(--warning);
+  background:var(--warning-bg);border:1px solid color-mix(in srgb,var(--warning) 35%,transparent);border-radius:var(--r-full);padding:5px 12px}
+
+.body{flex:1;min-height:0;overflow:hidden;padding:16px 18px;position:relative}
+.pane{display:none;height:100%}
+.pane.on{display:block}
+
+/* HORÁRIOS */
+.week{display:grid;gap:7px}
+.dayrow{display:flex;align-items:center;gap:12px;padding:9px 13px;border:1px solid var(--border);border-radius:14px;background:var(--surface)}
+.dayrow .dn{font-weight:800;font-size:13px;width:88px;color:var(--plum)}
+.turnos{display:flex;gap:7px;flex-wrap:wrap;flex:1}
+.turno{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:12.5px;color:var(--fg);
+  background:color-mix(in srgb,var(--success) 9%,transparent);border:1px solid color-mix(in srgb,var(--success) 30%,transparent);border-radius:var(--r-full);padding:5px 12px}
+.turno .e{font-size:13px}
+.fechado{font-size:12px;color:var(--fg-3);font-weight:600}
+.savebar{display:flex;justify-content:flex-end;margin-top:12px}
+.btn{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:13px;border-radius:10px;padding:9px 16px;cursor:pointer;border:none;font-family:inherit}
+.btn.go{background:var(--ifood);color:#fff}
+.btn.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 55%,transparent)}
+
+/* PAUSAS */
+.form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field .lb{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--fg-2)}
+.dthrow{display:flex;gap:8px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:7px;font-weight:700;font-size:13px;color:var(--fg);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px}
+.pill .e{font-size:14px}
+.inp{flex:1;min-width:0;font-weight:600;font-size:13px;color:var(--fg);background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;min-height:40px;display:flex;align-items:center}
+.inp.full{grid-column:span 2}
+.inp.cursorfill{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 45%,transparent);border-color:color-mix(in srgb,var(--ifood) 40%,transparent)}
+.inp .ph{color:var(--fg-3);font-weight:500}
+.inp .cur{color:var(--ifood);animation:cur .8s steps(1) infinite}
+@keyframes cur{50%{opacity:0}}
+.createbar{display:flex;justify-content:flex-end;margin-top:12px}
+
+.toast{display:flex;align-items:center;gap:8px;background:var(--success-bg);border:1px solid color-mix(in srgb,var(--success) 38%,transparent);
+  color:var(--success);font-weight:800;font-size:12.5px;border-radius:10px;padding:0 14px;height:0;opacity:0;overflow:hidden;transition:all .35s;margin-top:12px}
+.toast.on{opacity:1;height:auto;padding:11px 14px}
+
+.ptbl{margin-top:14px;border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.ptbl .th{display:grid;grid-template-columns:1.1fr 1fr 1fr 1.3fr;gap:8px;padding:9px 13px;background:var(--surface-muted);font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--fg-3)}
+.prow{display:grid;grid-template-columns:1.1fr 1fr 1fr 1.3fr;gap:8px;padding:11px 13px;border-top:1px solid var(--border);font-size:12.5px;align-items:center}
+.prow .loja{font-weight:800;color:var(--ifood);display:inline-flex;align-items:center;gap:6px}
+.prow.new{animation:rin .45s cubic-bezier(.22,1,.36,1)}
+@keyframes rin{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.ptitle{font-size:12px;font-weight:800;color:var(--fg-2);margin-top:16px}
+
+/* cursor + caption */
+.cursor{position:absolute;z-index:90;left:50%;top:50%;width:22px;height:22px;pointer-events:none;
+  transition:left .7s cubic-bezier(.5,0,.2,1),top .7s cubic-bezier(.5,0,.2,1);filter:drop-shadow(0 2px 3px rgba(40,31,79,.4))}
+.cursor.click{animation:clk .4s ease}
+@keyframes clk{0%,100%{transform:scale(1)}45%{transform:scale(.7)}}
+.ripple{position:absolute;z-index:89;width:32px;height:32px;border-radius:50%;border:2px solid var(--gold);transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none}
+.ripple.go{animation:rip .5s ease-out}
+@keyframes rip{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}}
+.caption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:10px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:88%;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--ifood);flex-shrink:0;animation:pulse 1.8s infinite}
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+@media(max-width:680px){.form{grid-template-columns:1fr}.inp.full{grid-column:span 1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <div class="toprow">
+      <span class="kicker"><span class="d"></span> iFood · horários & pausas</span>
+      <span class="oficial"><span class="ck">✓</span> Integração OFICIAL com a API do iFood · homologação aprovada</span>
+    </div>
+    <h1 class="scene-title">8 lojas. <span class="hl">Um painel.</span></h1>
+    <p class="scene-sub">Defina o <b>horário de abertura</b> e programe <b>pausas</b> com data e hora — tudo aplicando nas <b>8 lojas ao mesmo tempo</b>. No app do iFood seria loja por loja.</p>
+  </div>
+
+  <div class="appwin" id="app">
+    <div class="bar">
+      <span class="lojasel"><span class="star">★</span> Todas as lojas (8) ▾</span>
+      <div class="tabs">
+        <button class="tab" data-tab="horarios">🕐 Horários</button>
+        <button class="tab on" data-tab="pausas">⏸️ Pausas</button>
+      </div>
+      <span class="aviso">⚠️ Modo todas — aplica nas 8 lojas</span>
+    </div>
+
+    <div class="body">
+      <!-- HORÁRIOS -->
+      <div class="pane" data-pane="horarios">
+        <div class="week">
+          <div class="dayrow"><span class="dn">Segunda</span><div class="turnos"><span class="turno"><span class="e">🟢</span>18:00 – 00:00</span></div></div>
+          <div class="dayrow"><span class="dn">Terça</span><div class="turnos"><span class="turno"><span class="e">🟢</span>18:00 – 00:00</span></div></div>
+          <div class="dayrow"><span class="dn">Quarta</span><div class="turnos"><span class="turno"><span class="e">🟢</span>18:00 – 00:00</span></div></div>
+          <div class="dayrow"><span class="dn">Quinta</span><div class="turnos"><span class="turno"><span class="e">🟢</span>18:00 – 00:00</span></div></div>
+          <div class="dayrow"><span class="dn">Sexta</span><div class="turnos"><span class="turno"><span class="e">🟢</span>18:00 – 01:00</span></div></div>
+          <div class="dayrow"><span class="dn">Sábado</span><div class="turnos"><span class="turno"><span class="e">🟢</span>11:00 – 15:00</span><span class="turno"><span class="e">🟢</span>18:00 – 01:00</span></div></div>
+          <div class="dayrow"><span class="dn">Domingo</span><div class="turnos"><span class="turno"><span class="e">🟢</span>11:00 – 23:00</span></div></div>
+        </div>
+        <div class="savebar"><button class="btn go" id="btn-salvar-horario">💾 Salvar nas 8 lojas</button></div>
+      </div>
+
+      <!-- PAUSAS -->
+      <div class="pane on" data-pane="pausas">
+        <div class="form">
+          <div class="field">
+            <span class="lb">Início</span>
+            <div class="dthrow"><span class="pill"><span class="e">📅</span> 28/06/2026</span><span class="pill"><span class="e">🕐</span> 22:00 ▾</span></div>
+          </div>
+          <div class="field">
+            <span class="lb">Fim</span>
+            <div class="dthrow"><span class="pill"><span class="e">📅</span> 28/06/2026</span><span class="pill"><span class="e">🕐</span> 23:30 ▾</span></div>
+          </div>
+          <div class="field" style="grid-column:span 2">
+            <span class="lb">Descrição (opcional)</span>
+            <div class="inp full" id="desc"><span class="ph" id="desc-ph">Ex: Pausa para manutenção</span><span id="desc-typed"></span><span class="cur" id="desc-cur" style="display:none">▍</span></div>
+          </div>
+        </div>
+        <div class="createbar"><button class="btn go" id="btn-criar">⏸️ Criar pausa nas 8 lojas</button></div>
+
+        <div class="toast" id="toast">✅ Pausa criada em 8 lojas!</div>
+
+        <div class="ptitle">Pausas programadas <span id="pcount" style="color:var(--fg-3)">(1)</span></div>
+        <div class="ptbl">
+          <div class="th"><span>Loja</span><span>Início</span><span>Fim</span><span>Descrição</span></div>
+          <div id="prows">
+            <div class="prow"><span class="loja"><span class="star" style="color:var(--ifood)">★</span> Todas (8)</span><span class="mono">29/06 03:00</span><span class="mono">29/06 09:00</span><span style="color:var(--fg-2)">Fechado de madrugada</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ripple" id="ripple"></div>
+    <svg class="cursor" id="cursor" viewBox="0 0 24 24" fill="var(--plum-deep)" stroke="#fff" stroke-width="1.5"><path d="M4 2 L4 18 L8.5 14 L11 20 L14 18.5 L11.5 12.5 L18 12.5 Z"/></svg>
+    <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+  </div>
+</div>
+
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+const app=document.getElementById('app'),cursor=document.getElementById('cursor'),ripple=document.getElementById('ripple');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+function rectIn(el){const a=app.getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left-a.left+r.width/2,y:r.top-a.top+r.height/2};}
+async function moveTo(el){if(!el)return;const p=rectIn(el);cursor.style.left=(p.x-2)+'px';cursor.style.top=(p.y-2)+'px';await wait(740);}
+async function click(el){if(!el)return;const p=rectIn(el);ripple.style.left=p.x+'px';ripple.style.top=p.y+'px';cursor.classList.add('click');ripple.classList.remove('go');void ripple.offsetWidth;ripple.classList.add('go');el.classList.add('flash');await wait(420);cursor.classList.remove('click');setTimeout(()=>el.classList.remove('flash'),500);}
+
+function setTab(name){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t.dataset.tab===name));
+  document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('on',p.dataset.pane===name));
+}
+async function type(el,txt){for(let i=1;i<=txt.length;i++){el.textContent=txt.slice(0,i);await wait(36);}}
+
+function reset(){
+  setTab('pausas');
+  document.getElementById('desc-typed').textContent='';
+  document.getElementById('desc-ph').style.display='';
+  document.getElementById('desc-cur').style.display='none';
+  document.getElementById('desc').classList.remove('cursorfill');
+  document.getElementById('toast').classList.remove('on');
+  document.getElementById('prows').querySelectorAll('.prow.new').forEach(n=>n.remove());
+  document.getElementById('pcount').textContent='(1)';
+}
+
+async function director(){
+  while(true){
+    reset();capEl.classList.remove('show');
+    cursor.style.transition='none';const a=app.getBoundingClientRect();cursor.style.left=(a.width*0.5)+'px';cursor.style.top=(a.height*0.4)+'px';void cursor.offsetWidth;cursor.style.transition='';
+    await wait(700);
+
+    caption('Oito lojas no iFood. No app, seria abrir uma por uma. Aqui? Modo "Todas as lojas". 🏪');
+    await wait(2200);
+
+    // Horários
+    const tH=document.querySelector('[data-tab="horarios"]');await moveTo(tH);await click(tH);setTab('horarios');
+    caption('Define o horário de abertura de cada dia. Uma vez só. Vale pras oito.');
+    await wait(2600);
+
+    // Pausas
+    const tP=document.querySelector('[data-tab="pausas"]');await moveTo(tP);await click(tP);setTab('pausas');
+    caption('Vai ter manutenção? Programa a pausa: data, hora e motivo.');
+    await wait(1400);
+
+    // digita descrição
+    const desc=document.getElementById('desc');await moveTo(desc);
+    desc.classList.add('cursorfill');document.getElementById('desc-ph').style.display='none';document.getElementById('desc-cur').style.display='';
+    await type(document.getElementById('desc-typed'),'Pausa para manutenção');
+    await wait(600);desc.classList.remove('cursorfill');document.getElementById('desc-cur').style.display='none';
+
+    // cria
+    const bc=document.getElementById('btn-criar');await moveTo(bc);await click(bc);
+    await wait(300);
+    document.getElementById('toast').classList.add('on');
+    const row=document.createElement('div');row.className='prow new';
+    row.innerHTML='<span class="loja"><span class="star" style="color:var(--ifood)">★</span> Todas (8)</span><span class="mono">28/06 22:00</span><span class="mono">28/06 23:30</span><span style="color:var(--fg-2)">Pausa para manutenção</span>';
+    document.getElementById('prows').prepend(row);
+    document.getElementById('pcount').textContent='(2)';
+    caption('Um clique e as 8 lojas pausaram juntas. O que era a tarde inteira virou 10 segundos. ✅');
+    await wait(3200);
+  }
+}
+window.addEventListener('load',()=>setTimeout(director,600));
+</script>
+</body>
+</html>

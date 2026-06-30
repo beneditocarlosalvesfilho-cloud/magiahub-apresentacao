@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — WhatsApp cai no Hub ao vivo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--surface-muted:#F3EEE6;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--plum:#3D2F66;--plum-deep:#2A1F4F;
+  --gold:#E7B43B;--gold-2:#f4c84b;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--danger:#B91C1C;--info:#1D4ED8;
+  --est:#F97316;--est-soft:#FFF1E7;--est-line:#FBD9BF;--est-deep:#C2410E;
+  --fin:#16A34A;--fin-soft:#E7F6EC;--fin-line:#BBE7C8;--fin-deep:#15803D;
+  --wa:#25D366;--wa-deep:#128C7E;--wa-dark:#075E54;--wa-soft:#E4F8EA;--wa-line:#B5E8C5;
+  --wa-chatbg:#ECE4DB;--bub-out:#DCF8C6;--bub-out-line:#C7EDA8;--bub-in:#FFFFFF;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;overflow:hidden}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+*{scrollbar-width:none}*::-webkit-scrollbar{width:0;height:0;display:none}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 24px}
+.scene-head{margin-bottom:8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--wa-dark);padding:5px 12px;border-radius:var(--r-full);border:1px solid var(--wa-line);background:var(--wa-soft)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--wa);animation:pulse 1.8s infinite}
+.scene-title{font-family:"Anton";font-size:clamp(24px,3vw,40px);margin:8px 0 0;text-transform:uppercase;color:var(--plum)}
+.scene-title .hl{color:var(--wa-dark)}
+.scene-sub{margin:6px 0 0;max-width:640px;font-size:13.5px;color:var(--fg-2);line-height:1.45}
+.appwin{position:relative;margin-top:10px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 200px);min-height:420px;max-height:680px;display:flex;flex-direction:column}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--wa) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+.stage{flex:1;min-height:0;display:grid;grid-template-columns:0.8fr 70px 1.2fr;gap:8px;align-items:center;padding:16px 16px;position:relative}
+
+/* celular */
+.phone{justify-self:center;width:100%;max-width:212px;height:88%;max-height:430px;border-radius:26px;background:#0b1411;padding:7px 6px;
+  box-shadow:0 18px 40px -18px rgba(7,94,84,.5);display:flex;flex-direction:column;overflow:hidden}
+.screen{flex:1;min-height:0;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;background:var(--wa-chatbg)}
+.wahead{display:flex;align-items:center;gap:8px;padding:9px 10px;background:var(--wa-dark);color:#fff;flex-shrink:0}
+.wahead .av{width:28px;height:28px;border-radius:50%;background:var(--wa);display:flex;align-items:center;justify-content:center;font-size:14px}
+.wahead .nm{font-size:12px;font-weight:800}.wahead .st{font-size:9px;opacity:.85}
+.chat{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;padding:10px 9px}
+.bub{max-width:86%;font-size:11.5px;line-height:1.35;padding:7px 9px;border-radius:10px;animation:bin .3s ease both}
+@keyframes bin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.bub.out{align-self:flex-end;background:var(--bub-out);border:1px solid var(--bub-out-line);border-top-right-radius:3px;color:#11321a}
+.bub.in{align-self:flex-start;background:var(--bub-in);border:1px solid #E2DAD0;border-top-left-radius:3px;color:var(--fg)}
+.bub.ok{align-self:flex-start;background:var(--wa-soft);border:1px solid var(--wa-line);color:var(--wa-dark);font-weight:800}
+.typing{align-self:flex-start;background:var(--bub-in);border:1px solid #E2DAD0;border-radius:10px;border-top-left-radius:3px;padding:9px 11px;display:inline-flex;gap:3px}
+.typing i{width:5px;height:5px;border-radius:50%;background:var(--fg-3);animation:ty 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes ty{0%,60%,100%{opacity:.3}30%{opacity:1}}
+
+/* faísca de conexão */
+.spark{position:relative;height:100%;display:flex;align-items:center;justify-content:center}
+.spark .wire{position:absolute;left:0;right:0;top:50%;height:3px;transform:translateY(-50%);border-radius:var(--r-full);
+  background:repeating-linear-gradient(90deg,var(--wa-line) 0 5px,transparent 5px 10px);opacity:.6}
+.spark .bolt{position:relative;z-index:2;font-size:20px;opacity:0;transform:scale(.5)}
+.spark .bolt.go{animation:boltgo 1s ease}
+@keyframes boltgo{0%{opacity:0;transform:translateX(-22px) scale(.5)}30%{opacity:1;transform:translateX(0) scale(1.1)}100%{opacity:0;transform:translateX(22px) scale(.7)}}
+
+/* hub */
+.hub{height:92%;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden;box-shadow:0 12px 30px -20px rgba(40,31,79,.35)}
+.hubhead{display:flex;align-items:center;gap:8px;padding:11px 14px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--purple) 5%,var(--surface))}
+.hubhead .lg{width:24px;height:24px;border-radius:7px;background:var(--purple);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900}
+.hubhead .t{font-weight:900;font-size:13px;color:var(--plum)}
+.hubhead .live{margin-left:auto;font-size:10px;font-weight:800;color:var(--success);display:inline-flex;align-items:center;gap:5px}
+.hubhead .live .d{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 1.8s infinite}
+.hublist{flex:1;min-height:0;padding:12px 13px;display:flex;flex-direction:column;gap:10px}
+.hubsec{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-3)}
+.hrow{display:flex;align-items:center;gap:11px;border:1px solid var(--border);border-radius:12px;padding:11px 13px;background:var(--surface-2);
+  opacity:0;transform:translateX(14px) scale(.97);transition:all .45s cubic-bezier(.22,1,.36,1)}
+.hrow.on{opacity:1;transform:none}
+.hrow .ic{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.hrow.est .ic{background:var(--est-soft);border:1px solid var(--est-line)}
+.hrow.fin .ic{background:var(--fin-soft);border:1px solid var(--fin-line)}
+.hrow .mid{flex:1;min-width:0}
+.hrow .nm{font-weight:800;font-size:12.5px;color:var(--plum)}
+.hrow .meta{font-size:10.5px;color:var(--fg-3);font-weight:700}
+.hrow .nb{font-size:9.5px;font-weight:900;border-radius:var(--r-full);padding:3px 9px;white-space:nowrap}
+.hrow.est .nb{color:var(--est-deep);background:var(--est-soft);border:1px solid var(--est-line)}
+.hrow.fin .nb{color:var(--fin-deep);background:var(--fin-soft);border:1px solid var(--fin-line)}
+.hrow.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--wa) 32%,transparent)}
+
+.caption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:10px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:88%;text-align:left;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--wa);flex-shrink:0;animation:pulse 1.8s infinite}
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <span class="kicker"><span class="d"></span> WhatsApp · tempo real </span>
+    <h1 class="scene-title">Falou ali, <span class="hl">apareceu aqui.</span></h1>
+    <p class="scene-sub">No instante que você confirma no WhatsApp, o pedido e o título caem no Hub — ao vivo.</p>
+  </div>
+  <div class="appwin" id="app">
+    <div class="stage">
+      <!-- celular -->
+      <div class="phone"><div class="screen">
+        <div class="wahead"><span class="av">🪄</span><div><div class="nm">Magus</div><div class="st">online</div></div></div>
+        <div class="chat" id="chat"></div>
+      </div></div>
+
+      <!-- faísca -->
+      <div class="spark"><div class="wire"></div><div class="bolt" id="bolt">⚡</div></div>
+
+      <!-- hub -->
+      <div class="hub">
+        <div class="hubhead"><span class="lg">M</span><span class="t">Hub · ao vivo</span><span class="live"><span class="d"></span> tempo real</span></div>
+        <div class="hublist">
+          <div class="hubsec">Chegando agora</div>
+          <div class="hrow est" id="hrow0">
+            <span class="ic">📦</span>
+            <div class="mid"><div class="nm">Pedido de insumo</div><div class="meta">Açaí · 8 baldes · Fornecedor AÇAI</div></div>
+            <span class="nb">novo ✨</span>
+          </div>
+          <div class="hrow fin" id="hrow1">
+            <span class="ic">🧾</span>
+            <div class="mid"><div class="nm">Conta a pagar criada</div><div class="meta">Fornecedor AÇAI · R$ 600,00</div></div>
+            <span class="nb">novo ✨</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+  </div>
+</div>
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+function hideCap(){capEl.classList.remove('show');}
+
+const chat=document.getElementById('chat');
+const bolt=document.getElementById('bolt');
+const hrow0=document.getElementById('hrow0'),hrow1=document.getElementById('hrow1');
+
+function addBub(cls,html){const el=document.createElement('div');el.className='bub '+cls;el.innerHTML=html;chat.appendChild(el);}
+function addTyping(){const t=document.createElement('div');t.className='typing';t.innerHTML='<i></i><i></i><i></i>';chat.appendChild(t);return t;}
+
+function reset(){chat.innerHTML='';hrow0.classList.remove('on','flash');hrow1.classList.remove('on','flash');bolt.classList.remove('go');}
+
+async function director(){
+  while(true){
+    reset(); hideCap();
+    await wait(650);
+
+    caption('Mandei o pedido no WhatsApp, igual mando pra um amigo. 💬');
+    addBub('out','preciso de 8 baldes de açaí <span style="font-size:8px;color:var(--fg-3)">14:23</span>');
+    await wait(900);
+    let t=addTyping(); await wait(1100); t.remove();
+    addBub('in','📦 Açaí · 8 baldes · R$ 600. Confirmo?');
+    await wait(1100);
+    addBub('out','confirma ✅ <span style="font-size:8px;color:var(--fg-3)">14:23</span>');
+    await wait(700);
+    t=addTyping(); await wait(900); t.remove();
+    addBub('ok','✅ Feito! Já lancei no Hub.');
+    await wait(700);
+
+    caption('No instante do "confirma", a mágica cai no Hub. ⚡');
+    bolt.classList.remove('go');void bolt.offsetWidth;bolt.classList.add('go');
+    await wait(550);
+    hrow0.classList.add('on','flash');
+    await wait(1300);
+
+    caption('Pedido lançado e conta a pagar criada. Ao vivo, sem ninguém digitar no sistema.');
+    bolt.classList.remove('go');void bolt.offsetWidth;bolt.classList.add('go');
+    await wait(550);
+    hrow1.classList.add('on','flash');
+    await wait(3200);
+  }
+}
+window.addEventListener('load',()=>setTimeout(director,500));
+</script>
+</body>
+</html>

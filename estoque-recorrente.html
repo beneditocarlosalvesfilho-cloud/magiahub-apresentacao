@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — Estoque: compra recorrente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--surface-muted:#F3EEE6;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--violet:#9333EA;--plum:#3D2F66;--plum-deep:#2A1F4F;
+  --gold:#E7B43B;--gold-2:#f4c84b;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--warning:#A16207;--warning-bg:#FEF3C7;--danger:#B91C1C;--danger-bg:#FEE2E2;--info:#1D4ED8;
+  --est:#F97316;--est-deep:#C2410E;--est-soft:#FFF1E7;--est-line:#FBD9BF;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;overflow:hidden}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+*{scrollbar-width:none}*::-webkit-scrollbar{width:0;height:0;display:none}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 24px}
+.scene-head{margin-bottom:8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--est-deep);padding:5px 12px;border-radius:var(--r-full);border:1px solid var(--est-line);background:var(--est-soft)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--est);animation:pulse 1.8s infinite}
+.scene-title{font-family:"Anton";font-size:clamp(24px,3vw,40px);margin:8px 0 0;text-transform:uppercase;color:var(--plum)}
+.scene-title .hl{color:var(--est-deep)}
+.scene-sub{margin:6px 0 0;max-width:640px;font-size:13.5px;color:var(--fg-2);line-height:1.45}
+.scene-sub b{color:var(--plum)}
+.appwin{position:relative;margin-top:10px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 200px);min-height:420px;max-height:680px;display:flex;flex-direction:column}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--est) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+/* ===== card de recorrentes ===== */
+.body{flex:1;min-height:0;overflow:hidden;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.card{border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 10px 28px -20px rgba(40,31,79,.35);transition:box-shadow .4s,transform .4s}
+.card.glow{box-shadow:0 0 0 3px color-mix(in srgb,var(--est) 42%,transparent),0 14px 32px -18px rgba(249,115,22,.5);transform:translateY(-1px)}
+
+.chead{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:13px 15px;border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,var(--est-soft),transparent)}
+.chead .ttl{font-weight:900;font-size:14.5px;color:var(--plum);display:inline-flex;align-items:center;gap:7px}
+.badge-rec{display:inline-flex;align-items:center;gap:6px;margin-left:auto;font-size:11px;font-weight:800;
+  color:var(--est-deep);background:var(--est-soft);border:1px solid var(--est-line);border-radius:var(--r-full);padding:5px 11px}
+.badge-rec .spin{display:inline-block;animation:spin 4s linear infinite}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+
+/* cada regra: insumo -> fornecedor + preço -> qty/enviado */
+.rules{display:flex;flex-direction:column}
+.rule{display:flex;align-items:center;gap:11px;padding:11px 15px;border-bottom:1px solid var(--border)}
+.rule:last-child{border-bottom:none}
+.rule .em{font-size:20px;flex-shrink:0;width:26px;text-align:center}
+.rule .mid{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
+.rule .nm{font-weight:800;font-size:13px;color:var(--plum);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rule .sup{display:flex;align-items:center;gap:6px;font-size:11px;flex-wrap:wrap}
+.rule .sup .fb{display:inline-flex;align-items:center;gap:4px;background:var(--surface-2);border:1px solid var(--border);
+  border-radius:var(--r-full);padding:2px 9px;font-weight:700;color:var(--fg-2)}
+.rule .sup .pr{color:var(--est-deep);font-weight:800;font-variant-numeric:tabular-nums}
+.rule .right{flex-shrink:0;display:flex;align-items:center;justify-content:flex-end;min-width:84px}
+.rule .qt{font-size:11.5px;font-weight:800;color:var(--est-deep);background:var(--est-soft);border:1px solid var(--est-line);
+  border-radius:var(--r-full);padding:4px 11px;white-space:nowrap}
+.rule .sent{position:absolute;display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:var(--success);
+  background:var(--success-bg);border:1px solid color-mix(in srgb,var(--success) 35%,transparent);border-radius:var(--r-full);
+  padding:4px 10px;white-space:nowrap;opacity:0;transform:scale(.5);transition:all .35s cubic-bezier(.22,1,.36,1)}
+.rule .right{position:relative}
+.rule .sent.on{opacity:1;transform:scale(1)}
+.rule .qt{transition:opacity .25s}
+.rule.done .qt{opacity:0}
+
+.cfoot{display:flex;align-items:center;gap:10px;padding:13px 15px;border-top:1px solid var(--border);background:var(--surface-2)}
+.cfoot .note{font-size:11px;color:var(--fg-3);font-weight:700;line-height:1.3;max-width:48%}
+.btn{margin-left:auto;display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px;border-radius:11px;
+  padding:11px 18px;cursor:pointer;border:none;font-family:inherit;color:#fff;
+  background:linear-gradient(180deg,var(--est),var(--est-deep));box-shadow:0 8px 18px -8px rgba(249,115,22,.6)}
+.btn.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 55%,transparent),0 8px 18px -8px rgba(249,115,22,.6)}
+
+/* toast verde */
+.toast{display:flex;align-items:center;gap:9px;background:var(--success-bg);
+  border:1px solid color-mix(in srgb,var(--success) 38%,transparent);color:var(--success);font-weight:800;font-size:13px;
+  border-radius:12px;padding:0 15px;height:0;opacity:0;overflow:hidden;transition:all .4s cubic-bezier(.22,1,.36,1)}
+.toast.on{opacity:1;height:auto;padding:13px 15px}
+.toast .e{font-size:15px}
+
+/* ---- cursor + ripple + caption (NÃO MUDE) ---- */
+.cursor{position:absolute;z-index:90;left:50%;top:50%;width:22px;height:22px;pointer-events:none;transition:left .7s cubic-bezier(.5,0,.2,1),top .7s cubic-bezier(.5,0,.2,1);filter:drop-shadow(0 2px 3px rgba(40,31,79,.4))}
+.cursor.click{animation:clk .4s ease}
+@keyframes clk{0%,100%{transform:scale(1)}45%{transform:scale(.7)}}
+.ripple{position:absolute;z-index:89;width:32px;height:32px;border-radius:50%;border:2px solid var(--est);transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none}
+.ripple.go{animation:rip .5s ease-out}
+@keyframes rip{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}}
+.caption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:10px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:88%;text-align:left;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--est);flex-shrink:0;animation:pulse 1.8s infinite}
+.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 55%,transparent)!important}
+/* ---- embed: preenche a tela ---- */
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <span class="kicker"><span class="d"></span> Estoque · Compra recorrente </span>
+    <h1 class="scene-title">O insumo de sempre, <span class="hl">no fornecedor certo.</span></h1>
+    <p class="scene-sub">Cada insumo recorrente já tem <b>fornecedor</b> e <b>preço</b> cadastrados. Um clique e o pedido vai pro fornecedor certo — e a <b>conta a pagar</b> nasce sozinha.</p>
+  </div>
+  <div class="appwin" id="app">
+    <div class="body">
+      <div class="card" id="card">
+        <div class="chead">
+          <span class="ttl">🔁 Insumos recorrentes</span>
+          <span class="badge-rec"><span class="spin">🔁</span> sugestão semanal</span>
+        </div>
+        <div class="rules" id="rules">
+          <div class="rule">
+            <span class="em">🍔</span>
+            <div class="mid">
+              <span class="nm">Hambúrguer 150g</span>
+              <span class="sup"><span class="fb">🏭 Friboi Distribuidora</span><span class="pr">R$ 40,00/cx</span></span>
+            </div>
+            <div class="right"><span class="qt">12 cx</span><span class="sent">📤 enviado</span></div>
+          </div>
+          <div class="rule">
+            <span class="em">🧀</span>
+            <div class="mid">
+              <span class="nm">Queijo cheddar</span>
+              <span class="sup"><span class="fb">🏭 Laticínios Vale</span><span class="pr">R$ 58,00/cx</span></span>
+            </div>
+            <div class="right"><span class="qt">6 cx</span><span class="sent">📤 enviado</span></div>
+          </div>
+          <div class="rule">
+            <span class="em">🍟</span>
+            <div class="mid">
+              <span class="nm">Batata congelada</span>
+              <span class="sup"><span class="fb">🏭 Bonduelle</span><span class="pr">R$ 26,00/sc</span></span>
+            </div>
+            <div class="right"><span class="qt">8 sc</span><span class="sent">📤 enviado</span></div>
+          </div>
+        </div>
+        <div class="cfoot">
+          <span class="note">Fornecedor e preço fixos por insumo</span>
+          <button class="btn" id="btn-lancar">🔁 Lançar pedidos</button>
+        </div>
+      </div>
+
+      <div class="toast" id="toast"><span class="e">✅</span> Pedidos enviados aos fornecedores · 💳 contas a pagar criadas</div>
+    </div>
+
+    <!-- cursor + caption (sempre por último, dentro do #app) -->
+    <div class="ripple" id="ripple"></div>
+    <svg class="cursor" id="cursor" viewBox="0 0 24 24" fill="var(--plum-deep)" stroke="#fff" stroke-width="1.5"><path d="M4 2 L4 18 L8.5 14 L11 20 L14 18.5 L11.5 12.5 L18 12.5 Z"/></svg>
+    <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+  </div>
+</div>
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+const app=document.getElementById('app'),cursor=document.getElementById('cursor'),ripple=document.getElementById('ripple');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+function hideCap(){capEl.classList.remove('show');}
+function rectIn(el){const a=app.getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left-a.left+r.width/2,y:r.top-a.top+r.height/2};}
+async function moveTo(el){if(!el)return;const p=rectIn(el);cursor.style.left=(p.x-2)+'px';cursor.style.top=(p.y-2)+'px';await wait(740);}
+async function click(el){if(!el)return;const p=rectIn(el);ripple.style.left=p.x+'px';ripple.style.top=p.y+'px';cursor.classList.add('click');ripple.classList.remove('go');void ripple.offsetWidth;ripple.classList.add('go');if(el.classList)el.classList.add('flash');await wait(420);cursor.classList.remove('click');if(el.classList)setTimeout(()=>el.classList.remove('flash'),500);}
+
+const card=document.getElementById('card');
+const toast=document.getElementById('toast');
+const btn=document.getElementById('btn-lancar');
+const rules=()=>Array.from(document.querySelectorAll('#rules .rule'));
+
+function reset(){
+  card.classList.remove('glow');
+  toast.classList.remove('on');
+  rules().forEach(r=>{r.classList.remove('done');r.querySelector('.sent').classList.remove('on');});
+}
+
+async function director(){
+  while(true){
+    reset(); hideCap();
+    cursor.style.transition='none';const a=app.getBoundingClientRect();cursor.style.left=(a.width*0.5)+'px';cursor.style.top=(a.height*0.45)+'px';void cursor.offsetWidth;cursor.style.transition='';
+    await wait(700);
+
+    // 1 — conceito: mesmo insumo, mesmo fornecedor
+    caption('Toda semana o mesmo pedido pros mesmos fornecedores. Cansa, né? O Hub já sabe de cor.');
+    await wait(2400);
+
+    // 2 — fornecedor e preço já cadastrados
+    caption('Cada insumo já tem fornecedor e preço cravados. Você não digita nada.');
+    card.classList.add('glow');
+    await wait(1900);
+    card.classList.remove('glow');
+
+    // 3 — clica em Lançar
+    caption('Um clique…');
+    await moveTo(btn);
+    await click(btn);
+    await wait(500);
+
+    // 4 — cada pedido vai pro fornecedor certo + conta a pagar
+    caption('…vai pro fornecedor certo e a conta a pagar nasce sozinha. 🔁');
+    for(const r of rules()){ r.classList.add('done'); r.querySelector('.sent').classList.add('on'); await wait(360); }
+    await wait(250);
+    toast.classList.add('on');
+    await wait(3200);
+  }
+}
+window.addEventListener('load',()=>setTimeout(director,600));
+</script>
+</body>
+</html>

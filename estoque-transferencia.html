@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — Transferência entre lojas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--surface-muted:#F3EEE6;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--violet:#9333EA;--plum:#3D2F66;--plum-deep:#2A1F4F;
+  --gold:#E7B43B;--gold-2:#f4c84b;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--warning:#A16207;--warning-bg:#FEF3C7;--danger:#B91C1C;--danger-bg:#FEE2E2;--info:#1D4ED8;
+  --est:#F97316;--est-deep:#C2410E;--est-soft:#FFF1E7;--est-line:#FBD9BF;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;overflow:hidden}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+*{scrollbar-width:none}*::-webkit-scrollbar{width:0;height:0;display:none}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 24px}
+.scene-head{margin-bottom:8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--est-deep);padding:5px 12px;border-radius:var(--r-full);border:1px solid var(--est-line);background:var(--est-soft)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--est);animation:pulse 1.8s infinite}
+.scene-title{font-family:"Anton";font-size:clamp(24px,3vw,40px);margin:8px 0 0;text-transform:uppercase;color:var(--plum)}
+.scene-title .hl{color:var(--est-deep)}
+.scene-sub{margin:6px 0 0;max-width:640px;font-size:13.5px;color:var(--fg-2);line-height:1.45}
+.scene-sub b{color:var(--plum)}
+.appwin{position:relative;margin-top:10px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 200px);min-height:420px;max-height:680px;display:flex;flex-direction:column}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--est) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+/* topbar do app */
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 16px;border-bottom:1px solid var(--border)}
+.bar .ttl{display:inline-flex;align-items:center;gap:8px;font-weight:800;font-size:13px;color:var(--plum)}
+.bar .rede{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;color:var(--est-deep);
+  background:var(--est-soft);border:1px solid var(--est-line);border-radius:var(--r-full);padding:5px 11px}
+
+/* corpo: 2 unidades + seta no meio */
+.stage{flex:1;min-height:0;display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;
+  padding:16px 16px;position:relative}
+
+.unit{border:1.5px solid var(--border);border-radius:16px;background:var(--surface);padding:13px 13px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.unit.origem{border-color:var(--est-line)}
+.unit.destino{border-color:var(--border)}
+.unit .uh{display:flex;align-items:center;gap:7px}
+.unit .uh .nm{font-weight:900;font-size:13.5px;color:var(--plum);line-height:1.1}
+.unit .uh .tag{font-size:9.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;color:var(--fg-3);
+  background:var(--surface-muted);border-radius:var(--r-full);padding:2px 8px;margin-left:auto}
+.unit.origem .uh .tag{color:var(--est-deep);background:var(--est-soft);border:1px solid var(--est-line)}
+
+.item{border:1px solid var(--border);border-radius:12px;background:var(--surface-2);padding:11px 12px;display:flex;flex-direction:column;gap:8px}
+.item .nm{font-weight:700;font-size:12.5px;color:var(--fg);display:inline-flex;align-items:center;gap:7px}
+.item .nm .e{font-size:15px}
+.saldo{display:flex;align-items:baseline;gap:6px}
+.saldo .num{font-family:"Anton";font-size:34px;color:var(--plum);line-height:1;transition:color .25s}
+.saldo .un{font-weight:800;font-size:12px;color:var(--fg-3)}
+.saldo .num.pulseup{animation:popup .6s ease}
+.saldo .num.pulsedown{animation:popdn .6s ease}
+@keyframes popup{0%{color:var(--success);transform:scale(1)}40%{color:var(--est);transform:scale(1.14)}100%{color:var(--plum);transform:scale(1)}}
+@keyframes popdn{0%{color:var(--est-deep);transform:scale(1)}40%{color:var(--est);transform:scale(.9)}100%{color:var(--plum);transform:scale(1)}}
+.barwrap{height:6px;border-radius:var(--r-full);background:var(--surface-muted);overflow:hidden}
+.barfill{height:100%;border-radius:var(--r-full);background:linear-gradient(90deg,var(--est),var(--gold-2));width:50%;transition:width .7s cubic-bezier(.5,0,.2,1)}
+.unit.destino .barfill{background:linear-gradient(90deg,var(--est-deep),var(--est))}
+
+/* botão transferir dentro da origem */
+.tbtn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:800;font-size:12.5px;
+  border-radius:10px;padding:9px 12px;cursor:pointer;border:none;font-family:inherit;background:var(--est);color:#fff;
+  box-shadow:0 8px 18px -8px rgba(249,115,22,.7)}
+.tbtn.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 55%,transparent)}
+
+/* coluna central: seta + status */
+.mid{display:flex;flex-direction:column;align-items:center;gap:8px;min-width:96px;position:relative}
+.midlabel{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--est-deep)}
+.arrow{position:relative;width:84px;height:30px;display:flex;align-items:center;justify-content:center}
+.arrow .line{position:absolute;left:0;right:0;top:50%;height:3px;transform:translateY(-50%);border-radius:var(--r-full);
+  background:linear-gradient(90deg,var(--est-line),var(--est) 60%,var(--est-deep));overflow:hidden}
+.arrow .line::after{content:"";position:absolute;inset:0;width:40%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.85),transparent);
+  transform:translateX(-120%);animation:flow 1.6s linear infinite}
+@keyframes flow{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
+.arrow .head{position:absolute;right:-2px;top:50%;transform:translateY(-50%);font-size:22px;color:var(--est-deep);font-weight:900;line-height:1}
+.status{font-size:11px;font-weight:800;border-radius:var(--r-full);padding:5px 11px;white-space:nowrap;
+  border:1px solid var(--border);background:var(--surface);color:var(--fg-3);transition:all .3s}
+.status.transito{color:var(--warning);background:var(--warning-bg);border-color:color-mix(in srgb,var(--warning) 35%,transparent)}
+.status.recebido{color:var(--success);background:var(--success-bg);border-color:color-mix(in srgb,var(--success) 38%,transparent)}
+
+/* chip que voa */
+.chip{position:absolute;z-index:60;display:inline-flex;align-items:center;gap:6px;font-weight:900;font-size:13px;color:#fff;
+  background:linear-gradient(135deg,var(--est),var(--est-deep));border-radius:var(--r-full);padding:7px 13px;
+  box-shadow:0 10px 24px -8px rgba(194,65,12,.7);opacity:0;pointer-events:none;
+  left:0;top:50%;transform:translate(0,-50%) scale(.6)}
+.chip .e{font-size:15px}
+.chip.fly{animation:fly 1s cubic-bezier(.45,0,.2,1) forwards}
+@keyframes fly{
+  0%{opacity:0;transform:translate(0,-50%) scale(.5)}
+  14%{opacity:1;transform:translate(0,-50%) scale(1)}
+  82%{opacity:1}
+  100%{opacity:0;transform:translate(var(--dx,160px),-50%) scale(.6)}
+}
+
+/* cursor + ripple + caption (NÃO MUDE) */
+.cursor{position:absolute;z-index:90;left:50%;top:50%;width:22px;height:22px;pointer-events:none;transition:left .7s cubic-bezier(.5,0,.2,1),top .7s cubic-bezier(.5,0,.2,1);filter:drop-shadow(0 2px 3px rgba(40,31,79,.4))}
+.cursor.click{animation:clk .4s ease}
+@keyframes clk{0%,100%{transform:scale(1)}45%{transform:scale(.7)}}
+.ripple{position:absolute;z-index:89;width:32px;height:32px;border-radius:50%;border:2px solid var(--est);transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none}
+.ripple.go{animation:rip .5s ease-out}
+@keyframes rip{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}}
+.caption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:10px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:88%;text-align:left;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--est);flex-shrink:0;animation:pulse 1.8s infinite}
+.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 55%,transparent)!important}
+/* embed */
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+@media(max-width:560px){.saldo .num{font-size:28px}.mid{min-width:78px}.arrow{width:62px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <span class="kicker"><span class="d"></span> Estoque · Transferência</span>
+    <h1 class="scene-title">Uma loja pede, <span class="hl">a outra envia.</span></h1>
+    <p class="scene-sub">A unidade que precisou de um insumo faz o pedido; a outra loja da <b>mesma rede</b> envia — e o saldo dos dois lados se acerta sozinho.</p>
+  </div>
+
+  <div class="appwin" id="app">
+    <div class="bar">
+      <span class="ttl">🔁 Nova transferência</span>
+      <span class="rede">🏬 Rede Mage · mesmo CNPJ</span>
+    </div>
+
+    <div class="stage">
+      <!-- ORIGEM -->
+      <div class="unit origem">
+        <div class="uh">
+          <span style="font-size:18px">🏪</span>
+          <span class="nm">Mage Matriz</span>
+          <span class="tag">Origem</span>
+        </div>
+        <div class="item">
+          <span class="nm"><span class="e">📦</span> Caixa de copos</span>
+          <div class="saldo"><span class="num mono" id="orig-num">80</span><span class="un">un</span></div>
+          <div class="barwrap"><div class="barfill" id="orig-bar" style="width:80%"></div></div>
+        </div>
+        <button class="tbtn" id="btn-transferir">📤 Atender pedido · enviar 30 un →</button>
+      </div>
+
+      <!-- CENTRO -->
+      <div class="mid">
+        <span class="midlabel">Transferir</span>
+        <div class="arrow">
+          <div class="line"></div>
+          <span class="head">›</span>
+        </div>
+        <span class="status" id="status">pedido aberto</span>
+        <!-- chip voador -->
+        <div class="chip" id="chip"><span class="e">📦</span> 30 un</div>
+      </div>
+
+      <!-- DESTINO -->
+      <div class="unit destino">
+        <div class="uh">
+          <span style="font-size:18px">🏪</span>
+          <span class="nm">Mage Vila Velha</span>
+          <span class="tag">Destino</span>
+        </div>
+        <div class="item">
+          <span class="nm"><span class="e">📦</span> Caixa de copos</span>
+          <div class="saldo"><span class="num mono" id="dest-num">15</span><span class="un">un</span></div>
+          <div class="barwrap"><div class="barfill" id="dest-bar" style="width:15%"></div></div>
+        </div>
+        <div style="font-size:11px;font-weight:800;color:var(--est-deep);text-align:center">📩 Pediu 30 un à Matriz</div>
+      </div>
+    </div>
+
+    <!-- cursor + caption (sempre por último, dentro do #app) -->
+    <div class="ripple" id="ripple"></div>
+    <svg class="cursor" id="cursor" viewBox="0 0 24 24" fill="var(--plum-deep)" stroke="#fff" stroke-width="1.5"><path d="M4 2 L4 18 L8.5 14 L11 20 L14 18.5 L11.5 12.5 L18 12.5 Z"/></svg>
+    <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+  </div>
+</div>
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+const app=document.getElementById('app'),cursor=document.getElementById('cursor'),ripple=document.getElementById('ripple');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+function hideCap(){capEl.classList.remove('show');}
+function rectIn(el){const a=app.getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left-a.left+r.width/2,y:r.top-a.top+r.height/2};}
+async function moveTo(el){if(!el)return;const p=rectIn(el);cursor.style.left=(p.x-2)+'px';cursor.style.top=(p.y-2)+'px';await wait(740);}
+async function click(el){if(!el)return;const p=rectIn(el);ripple.style.left=p.x+'px';ripple.style.top=p.y+'px';cursor.classList.add('click');ripple.classList.remove('go');void ripple.offsetWidth;ripple.classList.add('go');if(el.classList)el.classList.add('flash');await wait(420);cursor.classList.remove('click');if(el.classList)setTimeout(()=>el.classList.remove('flash'),500);}
+
+const origNum=document.getElementById('orig-num'),destNum=document.getElementById('dest-num');
+const origBar=document.getElementById('orig-bar'),destBar=document.getElementById('dest-bar');
+const statusEl=document.getElementById('status'),chip=document.getElementById('chip');
+
+function setStatus(txt,cls){statusEl.textContent=txt;statusEl.className='status'+(cls?' '+cls:'');}
+
+// anima um número de a→b com pulso laranja (down=true encolhe)
+async function animNum(el,bar,from,to,maxPct,down){
+  const steps=14,dur=520;
+  el.classList.remove('pulseup','pulsedown');void el.offsetWidth;
+  el.classList.add(down?'pulsedown':'pulseup');
+  bar.style.width=Math.round((to/maxPct)*100)+'%';
+  for(let i=1;i<=steps;i++){
+    const v=Math.round(from+(to-from)*(i/steps));
+    el.textContent=v;await wait(dur/steps);
+  }
+  el.textContent=to;
+}
+
+function reset(){
+  origNum.textContent='80';destNum.textContent='15';
+  origBar.style.width='80%';destBar.style.width='15%';
+  origNum.classList.remove('pulseup','pulsedown');destNum.classList.remove('pulseup','pulsedown');
+  setStatus('pedido aberto','');
+  chip.classList.remove('fly');chip.style.opacity='0';
+}
+
+// faz o chip voar da origem (botão) até o destino
+async function flyChip(){
+  const a=app.getBoundingClientRect();
+  const start=document.getElementById('btn-transferir').getBoundingClientRect();
+  const end=document.getElementById('dest-num').getBoundingClientRect();
+  const sx=start.left-a.left+start.width/2;
+  const sy=start.top-a.top+start.height/2;
+  const ex=end.left-a.left;
+  chip.style.left=(sx-30)+'px';
+  chip.style.top=(sy)+'px';
+  chip.style.setProperty('--dx',(ex-sx+30)+'px');
+  chip.classList.remove('fly');void chip.offsetWidth;chip.classList.add('fly');
+}
+
+async function director(){
+  while(true){
+    reset(); hideCap();
+    cursor.style.transition='none';const a=app.getBoundingClientRect();cursor.style.left=(a.width*0.5)+'px';cursor.style.top=(a.height*0.45)+'px';void cursor.offsetWidth;cursor.style.transition='';
+    await wait(700);
+
+    // beat 1 — o pedido
+    caption('A filial ficou sem copos e pediu pra matriz. Nada de grupo de WhatsApp bagunçado.');
+    await wait(2200);
+
+    // beat 2 — atender
+    caption('A matriz atende e envia num toque. Tudo registrado, mesmo CNPJ.');
+    const btn=document.getElementById('btn-transferir');
+    await moveTo(btn);await click(btn);
+    await wait(900);
+
+    // beat 3 — viagem
+    caption('Os copos saem pra estrada… 🚚');
+    setStatus('em trânsito 🚚','transito');
+    flyChip();
+    await wait(1050);
+
+    // beat 4 — saldo acompanha
+    caption('…e o saldo das duas lojas se acerta junto. Estoque sempre na real. 🔁');
+    setStatus('recebido ✅','recebido');
+    animNum(origNum,origBar,80,50,80,true);
+    await animNum(destNum,destBar,15,45,80,false);
+    await wait(3000);
+  }
+}
+window.addEventListener('load',()=>setTimeout(director,600));
+</script>
+</body>
+</html>

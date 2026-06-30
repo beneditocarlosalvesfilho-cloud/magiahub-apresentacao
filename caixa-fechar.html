@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — Demo: fechar o caixa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--surface-muted:#F3EEE6;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--violet:#9333EA;--plum:#3D2F66;--plum-deep:#2A1F4F;
+  --gold:#E7B43B;--gold-2:#f4c84b;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--warning:#A16207;--danger:#B91C1C;--info:#1D4ED8;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased;min-height:100vh;overflow:hidden}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+.wrap{max-width:1180px;margin:0 auto;padding:12px 24px 12px}
+
+.scene-head{margin-bottom:8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold-deep,#A88C3E);padding:5px 12px;border-radius:var(--r-full);
+  border:1px solid color-mix(in srgb,var(--gold) 40%,var(--border));background:color-mix(in srgb,var(--gold) 10%,transparent)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--success);animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--success) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.scene-title{font-family:"Anton";font-size:clamp(24px,3vw,40px);margin:8px 0 0;text-transform:uppercase}
+.scene-title .hl{color:var(--purple)}
+.scene-sub{margin:6px 0 0;max-width:620px;font-size:13.5px;color:var(--fg-2);line-height:1.45}
+
+/* janela do app */
+.appwin{position:relative;margin-top:10px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 188px);min-height:460px;max-height:740px}
+/* fundo: dashboard do caixa (desfocado atrás do modal) */
+.bgdash{position:absolute;inset:0;padding:20px;filter:blur(2px);opacity:.5}
+.bgdash .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.bgk{border:1px solid var(--border);border-radius:14px;padding:14px 16px;background:var(--surface)}
+.bgk .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3);font-weight:700}
+.bgk .v{font-family:"Anton";font-size:26px;margin-top:6px;color:var(--plum)}
+
+.backdrop{position:absolute;inset:0;background:color-mix(in srgb,var(--plum-deep) 38%,transparent);z-index:10}
+
+/* MODAL fechar turno */
+.modal{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:20;width:96%;max-width:720px;
+  max-height:90%;background:var(--surface);border:1px solid var(--border);border-radius:14px;
+  box-shadow:0 30px 70px -20px rgba(40,31,79,.55);display:flex;flex-direction:column;overflow:hidden}
+.mhead{display:flex;align-items:center;justify-content:space-between;padding:15px 20px;border-bottom:1px solid var(--border)}
+.mhead .tt{font-size:17px;font-weight:800;color:var(--plum)}
+.mhead .sub{font-size:11.5px;color:var(--fg-2);margin-top:2px;font-weight:600}
+.mhead .x{width:30px;height:30px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);color:var(--fg-2);display:flex;align-items:center;justify-content:center;font-size:14px}
+.mbody{padding:18px 20px;overflow:auto;display:flex;flex-direction:column;gap:14px}
+.intro{font-size:12px;color:var(--fg-2);line-height:1.5;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:10px 13px}
+.intro b{color:var(--plum)}
+
+/* integração adquirentes (a "mágica" da leitura Z) */
+.integ{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;
+  background:color-mix(in srgb,var(--info) 7%,transparent);border:1px solid color-mix(in srgb,var(--info) 26%,transparent);
+  border-radius:12px;padding:13px 16px;opacity:0;transform:translateY(-4px);transition:all .45s ease}
+.integ.on{opacity:1;transform:none}
+.integ .lbl{width:100%;text-align:center;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--info)}
+.acq{display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:13px;color:var(--plum);
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--r-full);padding:8px 14px;box-shadow:0 4px 12px rgba(40,31,79,.08)}
+.acq small{font-weight:600;color:var(--fg-3);font-size:10.5px}
+.acq .ic{font-size:16px}
+.acq.frog{border-color:color-mix(in srgb,var(--success) 50%,transparent)}
+.acq.rede{border-color:color-mix(in srgb,var(--warning) 55%,transparent)}
+.integ.on .acq{animation:acqpulse 1.7s ease-in-out infinite}
+.integ.on .acq.rede{animation-delay:.35s}
+@keyframes acqpulse{0%,100%{box-shadow:0 4px 12px rgba(40,31,79,.08)}50%{box-shadow:0 4px 18px color-mix(in srgb,var(--info) 45%,transparent)}}
+.flow{display:inline-flex;gap:6px;align-items:center}
+.flow .dot{width:8px;height:8px;border-radius:50%;background:var(--info);opacity:.3}
+.integ.on .flow .dot{animation:flowdot 1.1s linear infinite}
+.integ.on .flow .dot:nth-child(2){animation-delay:.37s}.integ.on .flow .dot:nth-child(3){animation-delay:.74s}
+@keyframes flowdot{0%{opacity:.2;transform:translateX(-3px)}50%{opacity:1}100%{opacity:.2;transform:translateX(7px)}}
+.integ .dest{font-weight:800;font-size:12.5px;color:var(--info)}
+
+/* tabela conferência */
+.tbl{border:1px solid var(--border);border-radius:10px;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{background:var(--surface-2);text-align:left;padding:9px 13px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--fg-3)}
+thead th.r{text-align:right}
+tbody td{padding:11px 13px;border-top:1px solid var(--border);vertical-align:middle}
+tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
+.met{display:flex;align-items:center;gap:9px;font-weight:600}
+.met .e{font-size:18px}
+.met .tag{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;padding:2px 7px;border-radius:var(--r-full);margin-top:2px;display:inline-block}
+.met .col{display:flex;flex-direction:column;gap:1px}
+.tag.din{background:color-mix(in srgb,var(--warning) 14%,transparent);color:var(--warning)}.tag.man{background:color-mix(in srgb,var(--info) 14%,transparent);color:var(--info)}.tag.auto{background:var(--success-bg);color:var(--success)}.tag.inf{background:color-mix(in srgb,var(--fg-3) 16%,transparent);color:var(--fg-2)}
+.cell-input{display:inline-flex;align-items:center;justify-content:flex-end;min-width:120px;height:34px;padding:0 11px;border:1px solid var(--border);
+  border-radius:10px;background:var(--surface);font-variant-numeric:tabular-nums;font-weight:600;color:var(--fg);transition:all .3s ease}
+.cell-input.filled{border-color:color-mix(in srgb,var(--info) 45%,transparent);background:color-mix(in srgb,var(--info) 6%,transparent)}
+.cell-input.cursorfill{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 45%,transparent)}
+.sug{font-size:9.5px;color:var(--info);font-weight:700;margin-top:3px;display:none}
+.sug.on{display:block}
+.dash{color:var(--fg-3)}
+.div{font-weight:700}
+.div.zero{color:var(--success)}.div.pos{color:var(--success)}.div.neg{color:var(--danger)}
+
+.totalbar{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-radius:10px;
+  background:color-mix(in srgb,var(--fg-2) 6%,transparent);font-size:14px;font-weight:600;transition:all .4s ease}
+.totalbar.batido{background:var(--success-bg);border:1px solid color-mix(in srgb,var(--success) 35%,transparent)}
+.totalbar .lbl{color:var(--fg-2)}
+.totalbar .val{font-family:"Anton";font-size:26px;color:var(--fg-2)}
+.totalbar.batido .val,.totalbar.batido .lbl{color:var(--success)}
+
+.mfoot{display:flex;gap:10px;justify-content:flex-end;padding:14px 20px;border-top:1px solid var(--border)}
+.btn{font-weight:800;font-size:14px;border:none;border-radius:10px;padding:11px 20px;cursor:pointer;font-family:inherit}
+.btn-sec{background:var(--surface-2);color:var(--fg-2);border:1px solid var(--border)}
+.btn-go{background:var(--purple);color:#fff;box-shadow:0 8px 20px rgba(124,58,237,.3)}
+.btn-go.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 55%,transparent),0 8px 20px rgba(124,58,237,.3)}
+
+/* tela de sucesso */
+.success{position:absolute;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:color-mix(in srgb,var(--plum-deep) 42%,transparent);opacity:0;pointer-events:none;transition:opacity .4s}
+.success.on{opacity:1}
+.success .card{background:var(--surface);border-radius:18px;border:1px solid var(--border);padding:34px 38px;text-align:center;
+  box-shadow:0 30px 70px -20px rgba(40,31,79,.55);max-width:440px;transform:scale(.94);transition:transform .4s cubic-bezier(.22,1,.36,1)}
+.success.on .card{transform:none}
+.success .big{font-size:58px;line-height:1}
+.success h3{font-family:"Anton";font-size:28px;color:var(--success);margin:10px 0 6px;text-transform:uppercase}
+.success p{font-size:14px;color:var(--fg-2);line-height:1.5}
+.success .sm{margin-top:14px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.success .chip{font-size:12px;font-weight:700;color:var(--success);background:var(--success-bg);border-radius:var(--r-full);padding:6px 13px}
+
+/* cursor + caption */
+.cursor{position:absolute;z-index:90;left:50%;top:50%;width:22px;height:22px;pointer-events:none;
+  transition:left .7s cubic-bezier(.5,0,.2,1),top .7s cubic-bezier(.5,0,.2,1);filter:drop-shadow(0 2px 3px rgba(40,31,79,.4))}
+.cursor.click{animation:clk .4s ease}
+@keyframes clk{0%,100%{transform:scale(1)}45%{transform:scale(.7)}}
+.ripple{position:absolute;z-index:89;width:32px;height:32px;border-radius:50%;border:2px solid var(--gold);transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none}
+.ripple.go{animation:rip .5s ease-out}
+@keyframes rip{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}}
+.caption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:10px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:88%;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--gold-2);flex-shrink:0;animation:pulse 1.8s infinite}
+
+.footnote{display:none}
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+@media(max-width:680px){.bgdash .kpis{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <span class="kicker"><span class="d"></span> Operação · fechar caixa</span>
+    <h1 class="scene-title">O caixa fecha <span class="hl">batido. Sozinho.</span></h1>
+    <p class="scene-sub">Acabou o turno? A integração com <b>Rede</b> e <b>Frog Pay</b> traz a leitura Z das maquininhas, o sistema já preenche cartão e PIX, você só confere o dinheiro físico — e a divergência fecha em zero. <b>Sem planilha, sem dor de cabeça.</b></p>
+  </div>
+
+  <div class="appwin" id="app">
+    <!-- dashboard borrado atrás -->
+    <div class="bgdash">
+      <div class="kpis">
+        <div class="bgk"><div class="k">Vendas do turno</div><div class="v mono">172</div></div>
+        <div class="bgk"><div class="k">A conferir</div><div class="v mono">R$ 4.970</div></div>
+        <div class="bgk"><div class="k">Turno</div><div class="v">NOITE</div></div>
+        <div class="bgk"><div class="k">Maquininhas</div><div class="v mono">2</div></div>
+      </div>
+    </div>
+
+    <div class="backdrop"></div>
+
+    <!-- MODAL -->
+    <div class="modal">
+      <div class="mhead">
+        <div>
+          <div class="tt">Fechar turno — conferência por método</div>
+          <div class="sub">Turno NOITE · 18h–00h · Mage Burger</div>
+        </div>
+        <div class="x">✕</div>
+      </div>
+      <div class="mbody">
+        <div class="intro">
+          <b>Dinheiro</b> conta o caixa físico. <b>PIX/cartões</b> o sistema confere com a leitura Z da maquininha.
+          <b>Cupom iFood</b> vai direto pra adquirente (sem conferência). <b>Entregador</b> é só informativo.
+        </div>
+
+        <div class="integ" id="integ">
+          <span class="lbl">🔄 Integração ativa — leitura Z automática das maquininhas</span>
+          <span class="acq frog"><span class="ic">🐸</span> Frog Pay <small>· 191 · 488</small></span>
+          <span class="acq rede"><span class="ic">💳</span> Rede <small>· SN106776</small></span>
+          <span class="flow"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+          <span class="dest">preenche Crédito, Débito e PIX</span>
+        </div>
+
+        <div class="tbl">
+          <table>
+            <thead>
+              <tr><th>Método</th><th class="r">Esperado</th><th class="r">Contado</th><th class="r">Divergência</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="met"><span class="e">💵</span><div class="col"><span>Dinheiro</span><span class="tag din">dinheiro</span></div></div></td>
+                <td class="r mono">R$ 1.240,00</td>
+                <td class="r"><span class="cell-input" id="c-din">—</span></td>
+                <td class="r"><span class="div" id="d-din">—</span></td>
+              </tr>
+              <tr>
+                <td><div class="met"><span class="e">💳</span><div class="col"><span>Cartão de Crédito</span><span class="tag man">maquininha</span></div></div></td>
+                <td class="r mono">R$ 2.180,00</td>
+                <td class="r"><span class="cell-input" id="c-cred">—</span><div class="sug" id="s-cred">🔄 sugerido pela maquininha</div></td>
+                <td class="r"><span class="div" id="d-cred">—</span></td>
+              </tr>
+              <tr>
+                <td><div class="met"><span class="e">💳</span><div class="col"><span>Cartão de Débito</span><span class="tag man">maquininha</span></div></div></td>
+                <td class="r mono">R$ 940,00</td>
+                <td class="r"><span class="cell-input" id="c-deb">—</span><div class="sug" id="s-deb">🔄 sugerido pela maquininha</div></td>
+                <td class="r"><span class="div" id="d-deb">—</span></td>
+              </tr>
+              <tr>
+                <td><div class="met"><span class="e">🔑</span><div class="col"><span>PIX</span><span class="tag man">maquininha</span></div></div></td>
+                <td class="r mono">R$ 610,00</td>
+                <td class="r"><span class="cell-input" id="c-pix">—</span><div class="sug" id="s-pix">🔄 sugerido pela maquininha</div></td>
+                <td class="r"><span class="div" id="d-pix">—</span></td>
+              </tr>
+              <tr>
+                <td><div class="met"><span class="e">🍔</span><div class="col"><span>Cupom iFood</span><span class="tag auto">automático</span></div></div></td>
+                <td class="r mono">R$ 1.420,00</td>
+                <td class="r"><span class="dash">—</span></td>
+                <td class="r"><span class="div pos">R$ 0,00</span></td>
+              </tr>
+              <tr>
+                <td><div class="met"><span class="e">🛵</span><div class="col"><span>Entregador</span><span class="tag inf">informativo</span></div></div></td>
+                <td class="r mono">R$ 320,00</td>
+                <td class="r"><span class="dash">—</span></td>
+                <td class="r"><span class="dash">—</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="totalbar" id="totalbar">
+          <span class="lbl">Divergência total (dinheiro + cartões/PIX)</span>
+          <span class="val mono" id="divtotal">—</span>
+        </div>
+      </div>
+      <div class="mfoot">
+        <button class="btn btn-sec">Cancelar</button>
+        <button class="btn btn-go" id="btn-confirmar">✅ Confirmar fechamento</button>
+      </div>
+    </div>
+
+    <!-- sucesso -->
+    <div class="success" id="success">
+      <div class="card">
+        <div class="big">✅</div>
+        <h3>Turno fechado!</h3>
+        <p>Caixa batido, sem divergência. Tudo já conciliado no financeiro — você não vai precisar conferir nada depois.</p>
+        <div class="sm">
+          <span class="chip">Divergência R$ 0,00</span>
+          <span class="chip">4.970,00 conferidos</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- cursor + caption -->
+    <div class="ripple" id="ripple"></div>
+    <svg class="cursor" id="cursor" viewBox="0 0 24 24" fill="var(--plum-deep)" stroke="#fff" stroke-width="1.5"><path d="M4 2 L4 18 L8.5 14 L11 20 L14 18.5 L11.5 12.5 L18 12.5 Z"/></svg>
+    <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+  </div>
+
+  <p class="footnote">Tela de Fechar Caixa do MagiaHub · fluxo real recriado · dados ilustrativos · roda sozinho em loop</p>
+</div>
+
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+const app=document.getElementById('app'),cursor=document.getElementById('cursor'),ripple=document.getElementById('ripple');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+function hideCap(){capEl.classList.remove('show');}
+function rectIn(el){const a=app.getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left-a.left+r.width/2,y:r.top-a.top+r.height/2};}
+async function moveTo(el){if(!el)return;const p=rectIn(el);cursor.style.left=(p.x-2)+'px';cursor.style.top=(p.y-2)+'px';await wait(740);}
+async function click(el){if(!el)return;const p=rectIn(el);ripple.style.left=p.x+'px';ripple.style.top=p.y+'px';cursor.classList.add('click');ripple.classList.remove('go');void ripple.offsetWidth;ripple.classList.add('go');await wait(420);cursor.classList.remove('click');}
+
+const fmt=n=>'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const ESPERADO={din:1240,cred:2180,deb:940,pix:610};
+function setContado(key,val,sug){
+  const cell=document.getElementById('c-'+key);
+  cell.textContent=fmt(val);cell.classList.add('filled');
+  if(sug)document.getElementById('s-'+key).classList.add('on');
+  const diff=val-ESPERADO[key];
+  const d=document.getElementById('d-'+key);
+  d.textContent=(diff>=0?'+ ':'− ')+fmt(Math.abs(diff));
+  d.className='div '+(diff===0?'zero':diff>0?'pos':'neg');
+}
+function flashCell(key){const c=document.getElementById('c-'+key);c.classList.add('cursorfill');setTimeout(()=>c.classList.remove('cursorfill'),700);}
+function updateTotal(){
+  let t=0;['din','cred','deb','pix'].forEach(k=>{const cell=document.getElementById('c-'+k);if(cell.classList.contains('filled'))t+=parseFloat(cell.textContent.replace(/[^\d,]/g,'').replace(',','.'))-ESPERADO[k];});
+  const el=document.getElementById('divtotal');el.textContent=(t>=0?'+ ':'− ')+fmt(Math.abs(t));
+  document.getElementById('totalbar').classList.toggle('batido',Math.abs(t)<0.005);
+}
+
+function reset(){
+  ['din','cred','deb','pix'].forEach(k=>{
+    const c=document.getElementById('c-'+k);c.textContent='—';c.classList.remove('filled','cursorfill');
+    const d=document.getElementById('d-'+k);d.textContent='—';d.className='div';
+    const s=document.getElementById('s-'+k);if(s)s.classList.remove('on');
+  });
+  document.getElementById('integ').classList.remove('on');
+  document.getElementById('divtotal').textContent='—';
+  document.getElementById('totalbar').classList.remove('batido');
+  document.getElementById('success').classList.remove('on');
+  document.getElementById('btn-confirmar').classList.remove('flash');
+}
+
+async function director(){
+  while(true){
+    reset();hideCap();
+    cursor.style.transition='none';const a=app.getBoundingClientRect();cursor.style.left=(a.width*0.5)+'px';cursor.style.top=(a.height*0.42)+'px';void cursor.offsetWidth;cursor.style.transition='';
+    await wait(700);
+
+    caption('Fim do turno. Antes? Papelzinho, calculadora e aquela planilha que nunca batia.');
+    await wait(2200);
+
+    caption('Agora a Rede e a Frog Pay mandam a leitura Z das maquininhas. Cartão e PIX entram sozinhos. 🔄');
+    document.getElementById('integ').classList.add('on');
+    await wait(800);
+    setContado('cred',2180,true);updateTotal();await wait(500);
+    setContado('deb',940,true);updateTotal();await wait(500);
+    setContado('pix',610,true);updateTotal();await wait(1300);
+
+    caption('Você só conta o dinheiro da gaveta. Só isso. O resto o Hub já sabe.');
+    const cdin=document.getElementById('c-din');await moveTo(cdin);await click(cdin);
+    flashCell('din');setContado('din',1240,false);updateTotal();
+    await wait(1500);
+
+    caption('Bateu na hora. Divergência: R$ 0,00. Mágica? Não: integração. ✨');
+    await wait(2000);
+
+    const btn=document.getElementById('btn-confirmar');await moveTo(btn);btn.classList.add('flash');await click(btn);
+    await wait(300);
+    document.getElementById('success').classList.add('on');hideCap();
+    await wait(3200);
+  }
+}
+window.addEventListener('load',()=>setTimeout(director,600));
+</script>
+</body>
+</html>

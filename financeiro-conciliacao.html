@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — Conciliação automática</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--surface-muted:#F3EEE6;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--violet:#9333EA;--plum:#3D2F66;--plum-deep:#2A1F4F;
+  --gold:#E7B43B;--gold-2:#f4c84b;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--warning:#A16207;--warning-bg:#FEF3C7;--danger:#B91C1C;--danger-bg:#FEE2E2;--info:#1D4ED8;
+  --fin:#16A34A;--fin-deep:#15803D;--fin-soft:#E7F6EC;--fin-line:#BBE7C8;
+  --inter:#FF7A00;--inter-soft:#FFF0E2;--inter-line:#FFD2A8;
+  --sicoob:#00AE9D;--sicoob-soft:#E1F7F4;--sicoob-line:#A8E6DE;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;overflow:hidden}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+*{scrollbar-width:none}*::-webkit-scrollbar{width:0;height:0;display:none}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 24px}
+.scene-head{margin-bottom:8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--fin-deep);padding:5px 12px;border-radius:var(--r-full);border:1px solid var(--fin-line);background:var(--fin-soft)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--fin);animation:pulse 1.8s infinite}
+.scene-title{font-family:"Anton";font-size:clamp(24px,3vw,40px);margin:8px 0 0;text-transform:uppercase;color:var(--plum)}
+.scene-title .hl{color:var(--fin-deep)}
+.scene-sub{margin:6px 0 0;max-width:640px;font-size:13.5px;color:var(--fg-2);line-height:1.45}
+.scene-sub b{color:var(--plum)}
+.appwin{position:relative;margin-top:10px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 200px);min-height:420px;max-height:680px;display:flex;flex-direction:column}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--fin) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+.scr{flex:1;display:flex;flex-direction:column;padding:18px 22px;min-height:0;overflow:hidden}
+.kpibar{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.kpibar .lb{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-3)}
+.kpibar .big{font-family:"Anton";font-size:clamp(32px,4.4vw,50px);color:var(--fin);line-height:1}
+.kpibar .track{flex:1;height:13px;border-radius:999px;background:var(--surface-muted);overflow:hidden;max-width:420px}
+.kpibar .fill{height:100%;width:0;background:linear-gradient(90deg,var(--fin),#34d27f);border-radius:999px;transition:width .55s cubic-bezier(.22,1,.36,1)}
+
+.colhead{display:grid;grid-template-columns:1fr 104px 1fr;gap:12px;margin-bottom:9px}
+.colhead .h{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-3)}
+.colhead .h.r{text-align:right}
+.pairs{display:flex;flex-direction:column;gap:13px}
+.pair{display:grid;grid-template-columns:1fr 104px 1fr;gap:12px;align-items:center}
+.cell{border:1px solid var(--border);border-radius:13px;padding:12px 14px;background:var(--surface);transition:all .45s}
+.cell.tit{display:flex;flex-direction:column;gap:3px}
+.cell.ext{display:flex;flex-direction:column;gap:3px;text-align:right}
+.cell .nm{font-weight:800;font-size:13px;color:var(--plum)}
+.cell .vl{font-size:12.5px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--fg)}
+.cell.ext .vl{color:var(--danger)}
+.bk{font-size:9.5px;font-weight:800;border-radius:999px;padding:1px 8px;display:inline-block;align-self:flex-end}
+.bk.inter{color:var(--inter);background:var(--inter-soft);border:1px solid var(--inter-line)}
+.bk.sicoob{color:var(--sicoob);background:var(--sicoob-soft);border:1px solid var(--sicoob-line)}
+.pair.ok .cell{border-color:color-mix(in srgb,var(--fin) 50%,transparent);background:var(--fin-soft);box-shadow:0 6px 16px -10px color-mix(in srgb,var(--fin) 55%,transparent)}
+.conn{position:relative;display:flex;align-items:center;justify-content:center;height:100%}
+.conn .line{width:100%;height:2px;background:repeating-linear-gradient(90deg,var(--border) 0 5px,transparent 5px 10px);transition:background .4s}
+.pair.ok .conn .line{background:var(--fin)}
+.conn .ck{position:absolute;width:28px;height:28px;border-radius:50%;background:var(--fin);color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:900;opacity:0;transform:scale(.3);transition:all .38s cubic-bezier(.22,1.4,.4,1);
+  box-shadow:0 5px 14px color-mix(in srgb,var(--fin) 50%,transparent)}
+.pair.ok .conn .ck{opacity:1;transform:scale(1)}
+.tagok{display:none}
+
+.cursor{position:absolute;z-index:90;left:50%;top:50%;width:22px;height:22px;pointer-events:none;transition:left .7s cubic-bezier(.5,0,.2,1),top .7s cubic-bezier(.5,0,.2,1);filter:drop-shadow(0 2px 3px rgba(40,31,79,.4))}
+.cursor.click{animation:clk .4s ease}
+@keyframes clk{0%,100%{transform:scale(1)}45%{transform:scale(.7)}}
+.ripple{position:absolute;z-index:89;width:32px;height:32px;border-radius:50%;border:2px solid var(--fin);transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none}
+.ripple.go{animation:rip .5s ease-out}
+@keyframes rip{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}}
+.caption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:10px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:88%;text-align:left;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--fin);flex-shrink:0;animation:pulse 1.8s infinite}
+.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 55%,transparent)!important}
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <span class="kicker"><span class="d"></span> Financeiro · Conciliação </span>
+    <h1 class="scene-title">Já vem <span class="hl">conciliado.</span></h1>
+    <p class="scene-sub">Como o pagamento nasceu dentro do Hub, o título se amarra sozinho na transação do extrato. Sem conferir um a um no fim do mês.</p>
+  </div>
+  <div class="appwin" id="app">
+    <div class="scr">
+      <div class="kpibar">
+        <div><div class="lb">Conciliado</div><div class="big mono" id="kpi">0%</div></div>
+        <div class="track"><div class="fill" id="fill"></div></div>
+      </div>
+      <div class="colhead">
+        <div class="h">📄 Títulos pagos</div>
+        <div class="h" style="text-align:center"></div>
+        <div class="h r">Extrato bancário 🏦</div>
+      </div>
+      <div class="pairs" id="pairs">
+        <div class="pair">
+          <div class="cell tit"><span class="nm">Friboi Distribuidora</span><span class="vl">R$ 840,00</span></div>
+          <div class="conn"><span class="line"></span><span class="ck">✓</span></div>
+          <div class="cell ext"><span class="bk inter">Inter</span><span class="nm">Boleto Friboi</span><span class="vl">− R$ 840,00</span></div>
+        </div>
+        <div class="pair">
+          <div class="cell tit"><span class="nm">Energia EDP</span><span class="vl">R$ 940,00</span></div>
+          <div class="conn"><span class="line"></span><span class="ck">✓</span></div>
+          <div class="cell ext"><span class="bk inter">Inter</span><span class="nm">Boleto EDP</span><span class="vl">− R$ 940,00</span></div>
+        </div>
+        <div class="pair">
+          <div class="cell tit"><span class="nm">Coca FEMSA</span><span class="vl">R$ 1.120,00</span></div>
+          <div class="conn"><span class="line"></span><span class="ck">✓</span></div>
+          <div class="cell ext"><span class="bk inter">Inter</span><span class="nm">Boleto FEMSA</span><span class="vl">− R$ 1.120,00</span></div>
+        </div>
+        <div class="pair">
+          <div class="cell tit"><span class="nm">Aluguel do ponto</span><span class="vl">R$ 6.500,00</span></div>
+          <div class="conn"><span class="line"></span><span class="ck">✓</span></div>
+          <div class="cell ext"><span class="bk inter">Inter</span><span class="nm">Boleto Aluguel</span><span class="vl">− R$ 6.500,00</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ripple" id="ripple"></div>
+    <svg class="cursor" id="cursor" viewBox="0 0 24 24" fill="var(--plum-deep)" stroke="#fff" stroke-width="1.5"><path d="M4 2 L4 18 L8.5 14 L11 20 L14 18.5 L11.5 12.5 L18 12.5 Z"/></svg>
+    <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+  </div>
+</div>
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+const app=document.getElementById('app');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+function hideCap(){capEl.classList.remove('show');}
+
+const pairs=()=>Array.from(document.querySelectorAll('#pairs .pair'));
+const kpi=document.getElementById('kpi'),fill=document.getElementById('fill');
+const PCT=[25,50,75,100];
+
+function reset(){
+  pairs().forEach(p=>p.classList.remove('ok'));
+  kpi.textContent='0%';fill.style.width='0%';
+}
+
+async function director(){
+  while(true){
+    reset(); hideCap();
+    await wait(700);
+
+    caption('No fim do mês, todo mundo concilia transação por transação, na mão.');
+    await wait(2500);
+
+    caption('Aqui não. Como o pagamento nasceu dentro do Hub…');
+    await wait(1700);
+
+    caption('…o título se amarra no extrato sozinho. ✨');
+    const ps=pairs();
+    for(let i=0;i<ps.length;i++){
+      ps[i].classList.add('ok');
+      kpi.textContent=PCT[i]+'%';
+      fill.style.width=PCT[i]+'%';
+      await wait(900);
+    }
+    await wait(400);
+
+    caption('Já vem conciliado. Nunca mais na mão. 💚');
+    await wait(3300);
+  }
+}
+window.addEventListener('load',()=>setTimeout(director,600));
+</script>
+</body>
+</html>

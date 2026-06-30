@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — Agendar no Inter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--surface-muted:#F3EEE6;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--violet:#9333EA;--plum:#3D2F66;--plum-deep:#2A1F4F;
+  --gold:#E7B43B;--gold-2:#f4c84b;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--warning:#A16207;--warning-bg:#FEF3C7;--danger:#B91C1C;--danger-bg:#FEE2E2;--info:#1D4ED8;
+  --fin:#16A34A;--fin-deep:#15803D;--fin-soft:#E7F6EC;--fin-line:#BBE7C8;
+  --inter:#FF7A00;--inter-soft:#FFF0E2;--inter-line:#FFD2A8;
+  --sicoob:#00AE9D;--sicoob-soft:#E1F7F4;--sicoob-line:#A8E6DE;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;overflow:hidden}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+*{scrollbar-width:none}*::-webkit-scrollbar{width:0;height:0;display:none}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 24px}
+.scene-head{margin-bottom:8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--inter);padding:5px 12px;border-radius:var(--r-full);border:1px solid var(--inter-line);background:var(--inter-soft)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--inter);animation:pulse 1.8s infinite}
+.scene-title{font-family:"Anton";font-size:clamp(24px,3vw,40px);margin:8px 0 0;text-transform:uppercase;color:var(--plum)}
+.scene-title .hl{color:var(--inter)}
+.scene-sub{margin:6px 0 0;max-width:640px;font-size:13.5px;color:var(--fg-2);line-height:1.45}
+.scene-sub b{color:var(--plum)}
+.appwin{position:relative;margin-top:10px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 200px);min-height:420px;max-height:680px;display:flex;flex-direction:column}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--inter) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+.body{flex:1;min-height:0;overflow:hidden;padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.icard{border:1px solid var(--inter-line);border-radius:16px;background:var(--surface);overflow:hidden;display:flex;flex-direction:column;
+  box-shadow:0 12px 30px -20px rgba(255,122,0,.45)}
+.ihead{display:flex;align-items:center;gap:10px;padding:13px 15px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,var(--inter-soft),transparent)}
+.ihead .lg{width:28px;height:28px;border-radius:8px;background:var(--inter);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;flex-shrink:0}
+.ihead .tt{font-weight:900;font-size:14px;color:var(--inter)}
+.ihead .tt small{display:block;font-size:10px;color:var(--fg-3);font-weight:700}
+.pays{display:flex;flex-direction:column}
+.pay{display:flex;align-items:center;gap:10px;padding:11px 15px;border-bottom:1px solid var(--border)}
+.pay:last-child{border-bottom:none}
+.pay .mid{flex:1;min-width:0}
+.pay .nm{font-weight:800;font-size:12.5px;color:var(--plum);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pay .vl{font-size:11px;color:var(--fg-2);font-weight:700;font-variant-numeric:tabular-nums}
+.pay .st{flex-shrink:0;min-width:122px;display:flex;justify-content:flex-end}
+.sending{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--fg-3)}
+.sending .dots i{width:4px;height:4px;border-radius:50%;background:var(--inter);display:inline-block;margin-left:2px;animation:blink 1s infinite}
+.sending .dots i:nth-child(2){animation-delay:.2s}.sending .dots i:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,100%{opacity:.25}50%{opacity:1}}
+.done{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:800;color:var(--success);background:var(--success-bg);
+  border:1px solid color-mix(in srgb,var(--success) 35%,transparent);border-radius:var(--r-full);padding:4px 10px;
+  opacity:0;transform:scale(.5);transition:all .35s cubic-bezier(.22,1,.36,1)}
+.done.on{opacity:1;transform:scale(1)}
+.pay.ok .sending{display:none}
+.pfoot{display:flex;align-items:center;gap:10px;padding:13px 15px;border-top:1px solid var(--border);background:var(--surface-2);
+  opacity:0;transform:translateY(6px);transition:all .4s}
+.pfoot.on{opacity:1;transform:none}
+.pfoot .tot{font-family:"Anton";font-size:21px;color:var(--inter);line-height:1}
+.pfoot .tot small{font-family:"Archivo";font-size:10px;color:var(--fg-2);font-weight:800;display:block;text-transform:uppercase;letter-spacing:.04em;margin-top:3px}
+.pfoot .selo{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;color:var(--inter);
+  background:var(--inter-soft);border:1px solid var(--inter-line);border-radius:var(--r-full);padding:5px 11px}
+.pfoot .selo.pulse{animation:selopulse 1.6s ease-in-out infinite}
+@keyframes selopulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--inter) 40%,transparent)}50%{box-shadow:0 0 0 7px transparent}}
+
+.cursor{position:absolute;z-index:90;left:50%;top:50%;width:22px;height:22px;pointer-events:none;transition:left .7s cubic-bezier(.5,0,.2,1),top .7s cubic-bezier(.5,0,.2,1);filter:drop-shadow(0 2px 3px rgba(40,31,79,.4))}
+.cursor.click{animation:clk .4s ease}
+@keyframes clk{0%,100%{transform:scale(1)}45%{transform:scale(.7)}}
+.ripple{position:absolute;z-index:89;width:32px;height:32px;border-radius:50%;border:2px solid var(--inter);transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none}
+.ripple.go{animation:rip .5s ease-out}
+@keyframes rip{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}}
+.caption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:10px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:88%;text-align:left;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--inter);flex-shrink:0;animation:pulse 1.8s infinite}
+.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 55%,transparent)!important}
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <span class="kicker"><span class="d"></span> Financeiro · Inter </span>
+    <h1 class="scene-title">Agendados <span class="hl">num clique.</span></h1>
+    <p class="scene-sub">Os títulos selecionados vão pro Inter e cada um é <b>agendado na data certa</b> — sem abrir o app do banco.</p>
+  </div>
+  <div class="appwin" id="app">
+    <div class="body">
+      <div class="icard">
+        <div class="ihead">
+          <span class="lg">I</span>
+          <div class="tt">Inter · pagamentos em lote<small>4 títulos enviados do Hub</small></div>
+        </div>
+        <div class="pays" id="pays">
+          <div class="pay" data-date="agendado 05/07">
+            <div class="mid"><div class="nm">Friboi Distribuidora</div><div class="vl mono">R$ 840,00</div></div>
+            <div class="st"><span class="sending">enviando<span class="dots"><i></i><i></i><i></i></span></span><span class="done">✅ agendado 05/07</span></div>
+          </div>
+          <div class="pay" data-date="agendado 08/07">
+            <div class="mid"><div class="nm">Energia EDP</div><div class="vl mono">R$ 940,00</div></div>
+            <div class="st"><span class="sending">enviando<span class="dots"><i></i><i></i><i></i></span></span><span class="done">✅ agendado 08/07</span></div>
+          </div>
+          <div class="pay" data-date="agendado 12/07">
+            <div class="mid"><div class="nm">Coca FEMSA</div><div class="vl mono">R$ 1.120,00</div></div>
+            <div class="st"><span class="sending">enviando<span class="dots"><i></i><i></i><i></i></span></span><span class="done">✅ agendado 12/07</span></div>
+          </div>
+          <div class="pay" data-date="agendado 05/07">
+            <div class="mid"><div class="nm">Aluguel do ponto</div><div class="vl mono">R$ 6.500,00</div></div>
+            <div class="st"><span class="sending">enviando<span class="dots"><i></i><i></i><i></i></span></span><span class="done">✅ agendado 05/07</span></div>
+          </div>
+        </div>
+        <div class="pfoot" id="pfoot">
+          <div class="tot mono">R$ 9.400,00<small>4 pagamentos agendados</small></div>
+          <span class="selo" id="selo">🟠 agendado direto no Inter</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="ripple" id="ripple"></div>
+    <svg class="cursor" id="cursor" viewBox="0 0 24 24" fill="var(--plum-deep)" stroke="#fff" stroke-width="1.5"><path d="M4 2 L4 18 L8.5 14 L11 20 L14 18.5 L11.5 12.5 L18 12.5 Z"/></svg>
+    <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+  </div>
+</div>
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+const app=document.getElementById('app'),cursor=document.getElementById('cursor'),ripple=document.getElementById('ripple');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+function hideCap(){capEl.classList.remove('show');}
+
+const pfoot=document.getElementById('pfoot'),selo=document.getElementById('selo');
+const pays=()=>Array.from(document.querySelectorAll('#pays .pay'));
+
+function reset(){
+  pfoot.classList.remove('on');
+  selo.classList.remove('pulse');
+  pays().forEach(p=>{p.classList.remove('ok');p.querySelector('.done').classList.remove('on');});
+}
+
+async function director(){
+  while(true){
+    reset(); hideCap();
+    await wait(700);
+
+    caption('O lote chega no Inter e ele agenda todos. 🟠');
+    await wait(1800);
+
+    caption('Cada um na data certa do vencimento. Nada adiantado, nada atrasado.');
+    for(const p of pays()){ p.classList.add('ok'); p.querySelector('.done').classList.add('on'); await wait(420); }
+    await wait(400);
+
+    caption('Sem abrir o app do banco. Nem uma vez. ✨');
+    pfoot.classList.add('on');
+    selo.classList.add('pulse');
+    await wait(3200);
+  }
+}
+window.addEventListener('load',()=>setTimeout(director,600));
+</script>
+</body>
+</html>

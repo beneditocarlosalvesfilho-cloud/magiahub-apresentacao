@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — Integrações (TI)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--surface-muted:#F3EEE6;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--plum:#3D2F66;--plum-deep:#2A1F4F;
+  --gold:#E7B43B;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--success-line:#A7E8BE;--warning:#A16207;--warning-bg:#FCEFCB;--warning-line:#F2DDA0;
+  --ti:#5B6CFF;--ti-deep:#3B45C9;--ti-soft:#ECEEFF;--ti-line:#CBD2FB;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;overflow:hidden}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+*{scrollbar-width:none}*::-webkit-scrollbar{width:0;height:0;display:none}
+.wrap{max-width:1320px;margin:0 auto;padding:12px 24px}
+.scene-head{margin-bottom:8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ti-deep);padding:5px 12px;border-radius:var(--r-full);border:1px solid var(--ti-line);background:var(--ti-soft)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--ti);animation:pulse 1.8s infinite}
+.scene-title{font-family:"Anton";font-size:clamp(24px,3vw,40px);margin:8px 0 0;text-transform:uppercase;color:var(--plum)}
+.scene-title .hl{color:var(--ti-deep)}
+.scene-sub{margin:6px 0 0;max-width:820px;font-size:13.5px;color:var(--fg-2);line-height:1.45}
+.scene-sub b{color:var(--plum)}
+.counters{display:flex;gap:8px;margin-top:9px;flex-wrap:wrap}
+.cpill{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;border-radius:var(--r-full);padding:5px 12px;border:1px solid var(--border);background:var(--surface)}
+.cpill b{font-family:"Anton";font-size:15px;letter-spacing:.02em}
+.cpill.tot{color:var(--ti-deep);border-color:var(--ti-line);background:var(--ti-soft)}
+.cpill.on{color:var(--success);border-color:var(--success-line);background:var(--success-bg)}
+.cpill.cfg{color:var(--warning);border-color:var(--warning-line);background:var(--warning-bg)}
+.cpill .dt{width:7px;height:7px;border-radius:50%}
+.cpill.on .dt{background:var(--success)}.cpill.cfg .dt{background:var(--warning)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ti) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+.appwin{position:relative;margin-top:10px;border:1px solid var(--border);border-radius:16px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 188px);min-height:440px;max-height:760px;display:flex}
+
+/* ===== parede de logos (esquerda) ===== */
+.wall{flex:1.32;min-width:0;position:relative;padding:14px;display:grid;
+  grid-template-columns:repeat(5,1fr);grid-auto-rows:minmax(0,1fr);gap:10px;align-content:stretch;
+  background:
+    radial-gradient(720px 420px at 18% -10%,color-mix(in srgb,var(--ti) 9%,transparent),transparent 60%),
+    radial-gradient(620px 380px at 110% 120%,color-mix(in srgb,var(--purple) 8%,transparent),transparent 60%)}
+.chip{position:relative;border-radius:15px;background:#fff;border:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:7px 5px;
+  box-shadow:0 8px 22px -16px rgba(40,31,79,.4);cursor:default;overflow:hidden;
+  animation:floaty var(--fd,6s) ease-in-out infinite;transition:transform .45s cubic-bezier(.3,0,.2,1),box-shadow .45s,border-color .45s,opacity .45s}
+@keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.chip .logo{width:40px;height:40px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
+.chip .logo img{max-width:34px;max-height:34px;object-fit:contain}
+.chip .logo img.face,.d-logo img.face{max-width:none;max-height:none;width:100%;height:100%;object-fit:cover}
+.chip .logo.mono{font-family:"Anton";font-size:22px;color:#fff;letter-spacing:0}
+.chip .nm{font-size:10px;font-weight:800;color:var(--plum);text-align:center;line-height:1.12;max-width:100%;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;padding:0 2px}
+.chip .sdot{position:absolute;top:8px;right:8px;width:8px;height:8px;border-radius:50%;box-shadow:0 0 0 2px #fff}
+.chip .sdot.on{background:var(--success);animation:blink 1.8s infinite}
+.chip .sdot.cfg{background:var(--warning)}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.35}}
+/* destaque (spotlight) */
+.chip.active{transform:translateY(-4px) scale(1.13);z-index:5;border-color:var(--ac,#fff);
+  box-shadow:0 18px 40px -14px color-mix(in srgb,var(--ac,#000) 55%,transparent),0 0 0 3px color-mix(in srgb,var(--ac,#000) 30%,transparent);
+  animation:none}
+.wall.dim .chip:not(.active){opacity:.42;filter:saturate(.8)}
+
+/* ===== card-modal (direita) ===== */
+.detail{flex:1;min-width:0;border-left:1px solid var(--border);background:var(--surface);
+  display:flex;flex-direction:column;padding:22px 22px 18px;position:relative;overflow:hidden}
+.detail::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(460px 280px at 90% -10%,color-mix(in srgb,var(--ac,#5B6CFF) 14%,transparent),transparent 62%)}
+.d-card{position:relative;display:flex;flex-direction:column;min-height:0;flex:1}
+.d-card.pop{animation:popin .5s cubic-bezier(.2,.7,.2,1) both}
+@keyframes popin{from{opacity:0;transform:translateY(14px) scale(.98)}to{opacity:1;transform:none}}
+.d-top{display:flex;align-items:center;gap:14px}
+.d-logo{width:64px;height:64px;border-radius:16px;background:#fff;border:1px solid var(--border);overflow:hidden;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 10px 26px -16px rgba(40,31,79,.5)}
+.d-logo img{max-width:50px;max-height:50px;object-fit:contain}
+.d-logo.mono{font-family:"Anton";font-size:30px;color:#fff}
+.d-head{min-width:0;flex:1}
+.d-name{font-family:"Anton";font-size:clamp(22px,2.4vw,32px);color:var(--plum);text-transform:uppercase;line-height:.96}
+.d-meta{display:flex;align-items:center;gap:8px;margin-top:6px;flex-wrap:wrap}
+.d-cat{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-3)}
+.badge-st{display:inline-flex;align-items:center;gap:6px;font-size:10.5px;font-weight:800;border-radius:var(--r-full);padding:3px 10px}
+.badge-st .dt{width:6px;height:6px;border-radius:50%}
+.badge-st.on{color:var(--success);background:var(--success-bg);border:1px solid var(--success-line)}.badge-st.on .dt{background:var(--success)}
+.badge-st.cfg{color:var(--warning);background:var(--warning-bg);border:1px solid var(--warning-line)}.badge-st.cfg .dt{background:var(--warning)}
+.d-feeds{margin-top:3px;font-size:11.5px;font-weight:700;color:var(--ac,#5B6CFF)}
+
+.d-sec{margin-top:16px}
+.d-lbl{font-size:10.5px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3);display:flex;align-items:center;gap:6px}
+.d-faz{margin-top:6px;font-size:14px;line-height:1.5;color:var(--fg);font-weight:500}
+.d-faz b{color:var(--plum);font-weight:800}
+.autos{margin-top:8px;display:flex;flex-direction:column;gap:7px}
+.auto{display:flex;align-items:flex-start;gap:9px;background:var(--surface-2);border:1px solid var(--border);border-radius:11px;padding:8px 11px;
+  opacity:0;transform:translateX(8px);animation:slidein .42s ease both}
+@keyframes slidein{to{opacity:1;transform:none}}
+.auto .g{font-size:13px;flex-shrink:0;line-height:1.35}
+.auto .t{font-size:12.5px;font-weight:600;color:var(--fg);line-height:1.35}
+.auto .t b{color:var(--plum);font-weight:800}
+
+.d-foot{margin-top:auto;padding-top:12px;display:flex;align-items:center;gap:8px;font-size:11px;font-weight:700;color:var(--fg-3)}
+.d-foot .nav{margin-left:auto;display:flex;align-items:center;gap:5px}
+.d-foot .seg{width:14px;height:4px;border-radius:3px;background:var(--border);transition:.3s}
+.d-foot .seg.on{background:var(--ac,#5B6CFF);width:22px}
+
+.caption{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:9px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:90%;text-align:left;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--ti);flex-shrink:0;animation:pulse 1.8s infinite}
+
+@media(max-width:980px){
+  .appwin{flex-direction:column;height:auto;max-height:none}
+  .wall{grid-template-columns:repeat(4,1fr);order:2}
+  .detail{border-left:0;border-top:1px solid var(--border);order:1}
+  .chip .nm{font-size:9.5px}
+}
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <span class="kicker"><span class="d"></span> TI · Integrações</span>
+    <h1 class="scene-title">Tudo que o Hub <span class="hl">conversa.</span></h1>
+    <p class="scene-sub">Cada serviço da operação ligado num lugar só — banco, maquininha, delivery, PDV, marketing, RH e IA. Tudo <b>trocando dado sozinho</b>, sem ninguém copiar e colar.</p>
+    <div class="counters">
+      <span class="cpill tot"><b id="c-tot">0</b> integrações conectadas</span>
+    </div>
+  </div>
+
+  <div class="appwin" id="app">
+    <div class="wall" id="wall"></div>
+    <div class="detail" id="detail">
+      <div class="d-card" id="dcard"></div>
+      <div class="d-foot">
+        <span id="d-pos">—</span>
+        <span class="nav" id="d-nav"></span>
+      </div>
+    </div>
+  </div>
+  <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+</div>
+
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+const TI='/logos/ti/', PUB='logos/', LOC='logos/';
+// logo: caminho de imagem  |  mono: {t:'M', bg:'#...'} quando não há logo
+const DATA=[
+  // ===== Bancos & Pagamentos =====
+  {nm:'Banco Inter',cat:'Bancos & Pagamentos',st:'on',ac:'#FF7A00',logo:'logos/inter.png',
+   faz:'Conta PJ do Inter — extrato, PIX e pagamento de boletos direto pelo Hub.',
+   autos:['Paga e agenda vários boletos de uma vez, sem abrir o app do banco','Extrato cai sozinho pra conciliar','Comprovante do PIX volta no WhatsApp']},
+  {nm:'Sicoob',cat:'Bancos & Pagamentos',st:'cfg',ac:'#00945E',logo:'logos/ti/sicoob.ico',
+   faz:'Banco Sicoob — conta, boleto, PIX e TED por Open Banking (certificado digital).',
+   autos:['Extrato bancário sincroniza sozinho','Emite e baixa boleto de cobrança','Avisa quando o certificado vai vencer']},
+  {nm:'Rede',cat:'Bancos & Pagamentos',st:'cfg',ac:'#EE7203',logo:'logos/ti/rede.ico',
+   faz:'Adquirente das maquininhas (Itaú/Rede) — extrato das vendas no cartão.',
+   autos:['Puxa as vendas das maquininhas pro fechamento do caixa','Cruza com o banco pra conferir o que caiu']},
+  {nm:'Frog Pay',cat:'Bancos & Pagamentos',st:'cfg',ac:'#5DA02F',logo:'logos/ti/frogpay.png',
+   faz:'Adquirente das maquininhas físicas (terminais 191 e 488).',
+   autos:['Extrato das maquininhas pro fechamento','Confere a liquidação no banco']},
+  {nm:'Manio',cat:'Bancos & Pagamentos',st:'cfg',ac:'#5B5BD6',mono:{t:'M',bg:'#5B5BD6'},
+   faz:'Junta Itaú, Caixa e Nubank numa planilha que o Hub lê pra conciliar.',
+   autos:['Importa o extrato dos bancos que não têm API','Alimenta a conciliação automática']},
+  {nm:'Banco Jota',cat:'Bancos & Pagamentos',st:'cfg',ac:'#7C3AED',mono:{t:'J',bg:'#7C3AED'},
+   faz:'Conta no WhatsApp que recebe TODO boleto contra o seu CNPJ (DDA).',
+   autos:['Captura o boleto antes de vencer e já cria o título previsto','Você só aprova ou descarta']},
+  {nm:'Asaas',cat:'Bancos & Pagamentos',st:'on',ac:'#0EA5E9',mono:{t:'A',bg:'#0EA5E9'},
+   faz:'Confere o dono de uma chave PIX (nome / CNPJ) antes de você pagar.',
+   autos:['Mostra pra quem o PIX vai antes de confirmar']},
+
+  // ===== Fiscal & Notas =====
+  {nm:'Gmail',cat:'Fiscal & Notas',st:'on',ac:'#EA4335',logo:'logos/gmail.svg',
+   faz:'Lê o e-mail do fornecedor (XML da nota + boleto) e cria a conta a pagar sozinho.',
+   autos:['A cada 15 min varre o e-mail atrás de nota e boleto','Casa o XML com o boleto e lança a conta a pagar']},
+
+  // ===== Delivery & PDV =====
+  {nm:'Takeat',cat:'Delivery & PDV',st:'on',ac:'#F05A28',logo:'logos/takeat.png',feeds:'Vendas · Conta a Prazo',
+   faz:'PDV do restaurante — comandas, pagamentos e NFC-e. Inclui consumo a prazo.',
+   autos:['Vendas entram pro faturamento e o fechamento','Consumo a prazo vira dívida de funcionário/motoboy','Concilia os pagamentos por forma']},
+  {nm:'Foody',cat:'Delivery & PDV',st:'on',ac:'#E23E1C',logo:'logos/foody.svg',feeds:'Pedidos · Despacho',
+   faz:'Delivery — pedidos em tempo real e despacho dos entregadores.',
+   autos:['Pedido cai no painel ao vivo na hora','Despacha o entregador por um botão','Acha o bairro quando o pedido não traz']},
+  {nm:'iFood',cat:'Delivery & PDV',st:'on',ac:'#EA1D2C',logo:'logos/ti/ifood.svg',feeds:'Pedidos · Chat',
+   faz:'Merchant oficial do iFood — pedidos, lojas, pausas, horários e chat com o cliente.',
+   autos:['Pedidos das 8 lojas no painel','Abre/fecha loja e pausa de um lugar só','Responde avaliação no prazo']},
+  {nm:'Segundo Pedido',cat:'Delivery & PDV',st:'on',ac:'#E11D48',logo:'logos/ti/segundopedido.ico',
+   faz:'Identifica o cliente do iFood (telefone / CPF) que o PDV não captura.',
+   autos:['Recebe o cliente do iFood e linka na venda pro CRM']},
+  {nm:'Eclética',cat:'Delivery & PDV',st:'cfg',ac:'#7C3AED',mono:{t:'E',bg:'#7C3AED'},
+   faz:'PDV da loja Vamp São Mateus — lê o banco local da loja e empurra pro Hub.',
+   autos:['Espelha as vendas da Vamp (isolado da Mage)']},
+
+  // ===== Marketing =====
+  {nm:'Meta',cat:'Marketing',st:'on',ac:'#0081FB',logo:'logos/ti/meta.svg',feeds:'Instagram · Facebook · Anúncios',
+   faz:'Instagram, Facebook e Meta Ads num lugar — alcance, posts, Direct e campanhas.',
+   autos:['Puxa alcance, engajamento e gasto de anúncio','Responde Direct do Instagram no Inbox','Mostra o ROAS das campanhas']},
+  {nm:'Google',cat:'Marketing',st:'cfg',ac:'#4285F4',logo:'logos/ti/google.svg',feeds:'Perfil · Ads · Analytics',
+   faz:'Google Meu Negócio (avaliações), Google Ads e Analytics do site.',
+   autos:['Avaliações e métricas do perfil','Gasto e resultado dos anúncios']},
+
+  // ===== Comunicação & RH =====
+  {nm:'WhatsApp',cat:'Comunicação & RH',st:'on',ac:'#25D366',logo:'logos/ti/whatsapp.svg',feeds:'Evolution · Cloud API',
+   faz:'Gateway do WhatsApp — manda e recebe mensagem pela linha da loja (e canal oficial Meta).',
+   autos:['Fechamento do motoboy + comprovante','Aviso de ponto pro funcionário','Magus recebe comando e lança pedido']},
+  {nm:'Quark RH',cat:'Comunicação & RH',st:'cfg',ac:'#0EA5E9',logo:'logos/ti/quark.png',feeds:'Funcionários · Ponto',
+   faz:'Sistema de ponto e RH — cadastro dos funcionários e as batidas de ponto.',
+   autos:['Importa funcionário e casa por CPF','Lê o ponto e avisa atraso/esquecimento no WhatsApp','Relatório de ponto pro RH']},
+
+  // ===== Inteligência Artificial =====
+  {nm:'Claude',cat:'Inteligência Artificial',st:'on',ac:'#D97757',logo:'logos/claude.svg',feeds:'Anthropic',
+   faz:'O cérebro do Magus — entende o que você fala e decide o que fazer.',
+   autos:['Responde por voz com acesso a faturamento, pedido e estoque','Agente que lança pedido pelo WhatsApp']},
+  {nm:'Groq',cat:'Inteligência Artificial',st:'on',ac:'#F55036',mono:{t:'G',bg:'#F55036'},
+   faz:'Transcrição de voz ultrarrápida — transforma o que você fala em texto.',
+   autos:['Entende o áudio do Magus em ~0,2 segundo']},
+  {nm:'OpenAI',cat:'Inteligência Artificial',st:'on',ac:'#10A37F',mono:{t:'O',bg:'#10A37F'},
+   faz:'Transcrição reserva — entra quando o Groq não está disponível.',
+   autos:['Plano B da transcrição de voz']},
+  {nm:'ElevenLabs',cat:'Inteligência Artificial',st:'on',ac:'#5D5FEF',logo:'logos/elevenlabs.svg',
+   faz:'A voz do Magus — transforma a resposta em fala natural.',
+   autos:['Fala a resposta no alto-falante do dispositivo']},
+  {nm:'Gemini',cat:'Inteligência Artificial',st:'on',ac:'#4285F4',logo:'logos/googlegemini.svg',
+   faz:'Lê a foto do cupom fiscal e extrai os itens (a matemática é toda do Hub).',
+   autos:['Foto do cupom vira entrada de estoque','Funciona também por foto no WhatsApp']},
+  {nm:'Magus',cat:'Inteligência Artificial',st:'on',ac:'#7C3AED',logo:'face/magus-idle.jpg',face:true,
+   faz:'O assistente que você chama no WhatsApp pra lançar pedido sem abrir o Hub.',
+   autos:['Valida fornecedor + insumo + quantidade e pede confirmação','Emite o pedido recorrente sozinho']},
+];
+
+const wall=document.getElementById('wall'),dcard=document.getElementById('dcard'),dnav=document.getElementById('d-nav'),dpos=document.getElementById('d-pos');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+// se um logo não carregar, troca por uma caixinha colorida com a 1ª letra (nunca quebra)
+window.logoFail=function(img,color,letter,size){const p=img.parentElement;img.remove();p.classList.add('mono');p.style.background=color;p.innerHTML='<span style="font-family:Anton,sans-serif;font-size:'+size+'px;color:#fff">'+letter+'</span>';};
+
+function logoHTML(d,big){
+  if(d.logo) return `<img src="${d.logo}" alt="${esc(d.nm)}" loading="eager">`;
+  const m=d.mono;return `<span class="${big?'':''}" style="font-family:Anton;color:#fff">${m.t}</span>`;
+}
+
+// monta a parede
+DATA.forEach((d,i)=>{
+  const el=document.createElement('div');el.className='chip';el.dataset.i=i;
+  el.style.setProperty('--ac',d.ac);
+  el.style.setProperty('--fd',(5+ (i%5)*0.4 + (i%3)*0.3).toFixed(1)+'s');
+  el.style.animationDelay=(-(i*0.37)).toFixed(2)+'s';
+  const logoInner = d.logo
+    ? `<img src="${d.logo}" alt="${esc(d.nm)}" class="${d.face?'face':''}" loading="eager" onerror="logoFail(this,'${d.ac}','${esc(d.nm.charAt(0))}',22)">`
+    : `<span style="font-family:Anton,sans-serif;font-size:22px;color:#fff">${d.mono.t}</span>`;
+  const logoCls = d.logo ? 'logo' : 'logo mono';
+  const logoStyle = d.logo ? '' : `style="background:${d.mono.bg}"`;
+  el.innerHTML=`<div class="${logoCls}" ${logoStyle}>${logoInner}</div>`+
+    `<span class="nm">${esc(d.nm)}</span>`;
+  wall.appendChild(el);
+});
+// segmentos de navegação (rodapé)
+DATA.forEach(()=>{const s=document.createElement('span');s.className='seg';dnav.appendChild(s);});
+const chips=[...wall.querySelectorAll('.chip')];
+const segs=[...dnav.querySelectorAll('.seg')];
+
+// contadores
+const total=DATA.length, nOn=DATA.filter(d=>d.st==='on').length, nCfg=DATA.filter(d=>d.st==='cfg').length;
+// usa performance.now() consistentemente DENTRO do step (não o timestamp do rAF)
+// — em iframe as origens de tempo divergem e geravam contagem negativa gigante.
+function countTo(id,to,ms){const el=document.getElementById(id);const t0=performance.now();
+  function step(){const p=Math.min(1,Math.max(0,(performance.now()-t0)/ms));el.textContent=Math.round(to*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step);else el.textContent=to;}
+  requestAnimationFrame(step);}
+
+function showDetail(d,i){
+  dcard.style.setProperty('--ac',d.ac);
+  document.getElementById('detail').style.setProperty('--ac',d.ac);
+  const logoInner = d.logo
+    ? `<img src="${d.logo}" alt="${esc(d.nm)}" class="${d.face?'face':''}" onerror="logoFail(this,'${d.ac}','${esc(d.nm.charAt(0))}',30)">`
+    : `<span style="font-family:Anton;font-size:30px;color:#fff">${d.mono.t}</span>`;
+  const logoCls = d.logo ? 'd-logo' : 'd-logo mono';
+  const logoStyle = d.logo ? '' : `style="background:${d.mono.bg}"`;
+  const feeds = d.feeds?`<div class="d-feeds">${esc(d.feeds)}</div>`:'';
+  const autos = d.autos.map((a,k)=>`<div class="auto" style="animation-delay:${0.18+k*0.12}s"><span class="g">⚙️</span><span class="t">${a.replace(/\+/g,'<b>+</b>')}</span></div>`).join('');
+  dcard.innerHTML=
+    `<div class="d-top">`+
+      `<div class="${logoCls}" ${logoStyle}>${logoInner}</div>`+
+      `<div class="d-head">`+
+        `<div class="d-name">${esc(d.nm)}</div>`+
+        `<div class="d-meta"><span class="d-cat">${esc(d.cat)}</span></div>`+
+        feeds+
+      `</div>`+
+    `</div>`+
+    `<div class="d-sec"><div class="d-lbl">💡 O que faz</div><div class="d-faz">${d.faz}</div></div>`+
+    `<div class="d-sec"><div class="d-lbl">⚙️ Automações que criamos</div><div class="autos">${autos}</div></div>`;
+  dcard.classList.remove('pop');void dcard.offsetWidth;dcard.classList.add('pop');
+  dpos.textContent=`${i+1} / ${total}`;
+  segs.forEach((s,k)=>s.classList.toggle('on',k===i));
+}
+
+function spotlight(i){
+  chips.forEach((c,k)=>c.classList.toggle('active',k===i));
+  wall.classList.add('dim');
+  showDetail(DATA[i],i);
+}
+
+let idx=0;
+async function director(){
+  countTo('c-tot',total,1100);
+  await wait(500);
+  caption('Tudo que a loja usa, ligado num lugar só — e trocando dado sozinho.');
+  await wait(1400);
+  while(true){
+    spotlight(idx);
+    if(idx===0) caption('Cada peça: o que ela faz e as automações que a gente criou. 🔌');
+    await wait(2700);
+    idx=(idx+1)%total;
+    if(idx===0){caption('Tudo isso rodando sozinho, nos bastidores do Hub. ⚙️');await wait(900);}
+  }
+}
+window.addEventListener('load',()=>setTimeout(director,300));
+</script>
+</body>
+</html>

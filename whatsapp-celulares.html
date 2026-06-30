@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — WhatsApp: 4 conversas reais</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--surface-muted:#F3EEE6;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--plum:#3D2F66;--plum-deep:#2A1F4F;
+  --gold:#E7B43B;--gold-2:#f4c84b;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--danger:#B91C1C;
+  --wa:#25D366;--wa-deep:#128C7E;--wa-dark:#075E54;--wa-soft:#E4F8EA;--wa-line:#B5E8C5;
+  --wa-chatbg:#ECE4DB;--bub-out:#DCF8C6;--bub-out-line:#C7EDA8;--bub-in:#FFFFFF;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;overflow:hidden}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+*{scrollbar-width:none}*::-webkit-scrollbar{width:0;height:0;display:none}
+.wrap{max-width:1280px;margin:0 auto;padding:12px 24px}
+.scene-head{margin-bottom:8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--wa-dark);padding:5px 12px;border-radius:var(--r-full);border:1px solid var(--wa-line);background:var(--wa-soft)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--wa);animation:pulse 1.8s infinite}
+.scene-title{font-family:"Anton";font-size:clamp(24px,3vw,40px);margin:8px 0 0;text-transform:uppercase;color:var(--plum)}
+.scene-title .hl{color:var(--wa-dark)}
+.scene-sub{margin:6px 0 0;max-width:720px;font-size:13.5px;color:var(--fg-2);line-height:1.45}
+.scene-sub b{color:var(--plum)}
+.appwin{position:relative;margin-top:10px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 200px);min-height:440px;max-height:720px;display:flex;flex-direction:column}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--wa) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+.phones{flex:1;min-height:0;display:grid;grid-template-columns:repeat(4,1fr);gap:14px;padding:14px 16px}
+.phonewrap{display:flex;flex-direction:column;gap:7px;min-height:0}
+.plabel{text-align:center;font-size:11px;font-weight:800;color:var(--wa-dark);background:var(--wa-soft);border:1px solid var(--wa-line);border-radius:var(--r-full);padding:4px 8px;flex-shrink:0}
+.phone{flex:1;min-height:0;border-radius:26px;background:#0b1411;padding:7px 6px;box-shadow:0 18px 40px -18px rgba(7,94,84,.5);display:flex;flex-direction:column;overflow:hidden}
+.screen{flex:1;min-height:0;border-radius:20px;overflow:hidden;display:flex;flex-direction:column;background:var(--wa-chatbg)}
+.wahead{display:flex;align-items:center;gap:8px;padding:9px 10px;background:var(--wa-dark);color:#fff;flex-shrink:0}
+.wahead .bk{font-size:13px;opacity:.8}
+.wahead .av{width:30px;height:30px;border-radius:50%;background:var(--wa);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.wahead .who .nm{font-size:12.5px;font-weight:800;line-height:1.15}
+.wahead .who .st{font-size:9px;opacity:.85}
+.chat{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:5px;padding:10px 9px;scroll-behavior:smooth}
+.bub{max-width:88%;font-size:11px;line-height:1.34;padding:6px 8px;border-radius:10px;animation:bin .3s ease both;word-break:break-word}
+@keyframes bin{from{opacity:0;transform:translateY(6px) scale(.98)}to{opacity:1;transform:none}}
+.bub.in{align-self:flex-start;background:var(--bub-in);border:1px solid #E2DAD0;border-top-left-radius:3px;color:var(--fg)}
+.bub.out{align-self:flex-end;background:var(--bub-out);border:1px solid var(--bub-out-line);border-top-right-radius:3px;color:#11321a}
+.bub .tm{display:block;text-align:right;font-size:8px;color:var(--fg-3);margin-top:2px}
+.bub.out .tm{color:#5a7a52}
+.bub.ok{font-weight:700;color:var(--wa-dark);background:var(--wa-soft);border-color:var(--wa-line);align-self:flex-start}
+.bub.ok b{color:var(--wa-dark)}
+.bub b{font-weight:800}
+.code{font-family:"Courier New",monospace;background:rgba(0,0,0,.06);padding:0 3px;border-radius:3px;font-size:10px;letter-spacing:-.02em}
+/* botões / lista interativos do WhatsApp */
+.wabtns{align-self:flex-start;width:88%;display:flex;flex-direction:column;gap:3px;margin:1px 0 3px;animation:bin .3s ease both}
+.wabtn{background:#fff;border:1px solid #d6e7dd;color:var(--wa-deep);font-weight:800;font-size:10.5px;text-align:center;padding:6px 7px;border-radius:8px;box-shadow:0 1px 2px rgba(7,94,84,.08)}
+.wabtn.list{color:var(--wa-deep);letter-spacing:.01em}
+.typing{align-self:flex-start;background:var(--bub-in);border:1px solid #E2DAD0;border-radius:10px;border-top-left-radius:3px;padding:8px 11px;display:inline-flex;gap:3px;animation:bin .3s ease both}
+.typing i{width:5px;height:5px;border-radius:50%;background:var(--fg-3);animation:ty 1s infinite}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes ty{0%,60%,100%{opacity:.3}30%{opacity:1}}
+.photobub{align-self:flex-end;max-width:80%;background:var(--bub-out);border:1px solid var(--bub-out-line);border-radius:10px;border-top-right-radius:3px;padding:5px;animation:bin .3s ease both}
+.photobub .rc{background:#fff;border-radius:6px;padding:8px 8px;font-family:"Courier New",monospace;font-size:7.5px;color:#454545;line-height:1.55}
+.photobub .rc .h{text-align:center;font-weight:700;font-size:7.5px;margin-bottom:3px}
+.photobub .rc .ln{display:flex;justify-content:space-between;gap:6px}
+.photobub .rc .dash{border-top:1px dashed #c9c2b6;margin:3px 0}
+.photobub .cap{font-size:8.5px;color:#11321a;text-align:right;margin-top:3px;font-weight:700}
+@media(max-width:880px){.phones{grid-template-columns:repeat(2,1fr)}}
+
+.caption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:10px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:88%;text-align:left;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--wa);flex-shrink:0;animation:pulse 1.8s infinite}
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <span class="kicker"><span class="d"></span> WhatsApp · API oficial </span>
+    <h1 class="scene-title">Quatro conversas, <span class="hl">um sistema só.</span></h1>
+    <p class="scene-sub">No WhatsApp oficial, o <b>Magus</b> conduz cada um por menu — com perguntas, listas e confirmações de verdade. No último "confirmar", já executou: foto vira estoque, pedido vira compra, conta vira título, vale entra na folha.</p>
+  </div>
+  <div class="appwin" id="app">
+    <div class="phones">
+      <div class="phonewrap">
+        <div class="plabel">📸 Foto → estoque</div>
+        <div class="phone"><div class="screen">
+          <div class="wahead"><span class="bk">‹</span><span class="av">🪄</span><div class="who"><div class="nm">Magus</div><div class="st">online</div></div></div>
+          <div class="chat" id="chat0"></div>
+        </div></div>
+      </div>
+      <div class="phonewrap">
+        <div class="plabel">🛒 Pedido de insumo</div>
+        <div class="phone"><div class="screen">
+          <div class="wahead"><span class="bk">‹</span><span class="av">🪄</span><div class="who"><div class="nm">Magus</div><div class="st">online</div></div></div>
+          <div class="chat" id="chat1"></div>
+        </div></div>
+      </div>
+      <div class="phonewrap">
+        <div class="plabel">💳 Criar título</div>
+        <div class="phone"><div class="screen">
+          <div class="wahead"><span class="bk">‹</span><span class="av">🪄</span><div class="who"><div class="nm">Magus</div><div class="st">online</div></div></div>
+          <div class="chat" id="chat2"></div>
+        </div></div>
+      </div>
+      <div class="phonewrap">
+        <div class="plabel">🎟️ Vale</div>
+        <div class="phone"><div class="screen">
+          <div class="wahead"><span class="bk">‹</span><span class="av">🪄</span><div class="who"><div class="nm">Magus</div><div class="st">online</div></div></div>
+          <div class="chat" id="chat3"></div>
+        </div></div>
+      </div>
+    </div>
+    <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+  </div>
+</div>
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+
+// Cupom (foto) — bate com a sessão real: MERCADO BOM PREÇO · R$ 37,38 · 2 itens
+const PHOTO=`<div class="photobub"><div class="rc"><div class="h">MERCADO BOM PREÇO LTDA</div><div class="ln"><span>SAL REFINADO GLOBO</span><span>13,65</span></div><div class="ln"><span>MORANGO BANDEJA</span><span>23,73</span></div><div class="dash"></div><div class="ln"><span>TOTAL</span><span>37,38</span></div></div><div class="cap">📷 cupom · 16:25 ✓✓</div></div>`;
+
+// Texto real dos fluxos do Magus (lib/magus-wa/fluxos/*). Encoding por passo:
+//  ['ph']                       foto do cupom
+//  ['in',  txt]                 mensagem do Magus (texto)
+//  ['inb', txt, [botões]]       mensagem do Magus + botões de resposta
+//  ['inl', txt, 'rótulo lista'] mensagem do Magus + abridor de lista
+//  ['out', txt]                 você digitou
+//  ['pick',txt]                 você tocou um botão / item da lista
+//  ['ok',  txt]                 confirmação final
+const SEQ=[
+ [ // 0 — 📸 Foto → estoque (cupom mercado, item Sal)
+   ['ph'],
+   ['in','Aguenta aí! 📸 Tô lendo o seu cupom. Te aviso quando terminar.'],
+   ['inb','Li o cupom!\n\n*MERCADO BOM PREÇO*\nTotal: R$ 37,38\nItens: 2 itens\n\nFoi parcelado, tem vários planos ou precisou de ajuste de valor?',['Sim, é complexo','Não, é simples']],
+   ['pick','Não, é simples'],
+   ['inb','Data do cupom: *25/06*.\nLançar a entrada no estoque nessa data?',['Usar 25/06','Outra data']],
+   ['pick','Usar 25/06'],
+   ['inb','Qual foi a forma de pagamento?',['Dinheiro','PIX','Cartão débito']],
+   ['pick','PIX'],
+   ['inb','(1/2) *SAL REFINADO GLOBO*\n5 UN · R$ 13,65\n\nSugestão: *Sal*\n\nÉ esse insumo?',['É esse','Trocar']],
+   ['pick','É esse'],
+   ['inb','*SAL REFINADO GLOBO*\nInsumo: *Sal* (base: un)\n\nUnidade do cupom (UN) igual à base. Confirma com fator 1?',['Confirmar']],
+   ['pick','Confirmar'],
+   ['inb','*Resumo do cupom*\n\nMercado: MERCADO BOM PREÇO\nValor: R$ 37,38\nForma de pagto: PIX\nEntrada no estoque: 25/06/2026\nItens: 2\n- SAL REFINADO GLOBO x5\n- MORANGO x2\n\nConfirma o registro?',['Confirmar','Cancelar']],
+   ['pick','Confirmar'],
+   ['ok','Cupom registrado! ✅\n\nTítulo: R$ 37,38 (aberto)\nItens no estoque: 2'],
+ ],
+ [ // 1 — 🛒 Pedido de insumo (fornecedor AÇAI, insumo Açai 8 baldes)
+   ['out','menu'],
+   ['inb','O que vamos fazer, chefe? 🪄',['Pedido de insumo','Vale','Título']],
+   ['pick','Pedido de insumo'],
+   ['inl','Qual fornecedor?','Ver fornecedores'],
+   ['pick','AÇAI'],
+   ['in','Quantos *Açai*? (em Balde (5L))'],
+   ['out','8'],
+   ['inb','*Pedido para AÇAI*\n\n• *Açai* — 8 Balde (5L) (R$ 75,00)\n\n*Total: R$ 600,00*\nVencimento: 28/06/2026\n\nConfirmar envio?',['Confirmar envio','Cancelar']],
+   ['pick','Confirmar envio'],
+   ['ok','Pedido *#284* enviado! ✅\nWhatsApp pro fornecedor foi disparado.\nConfira em /compras.'],
+ ],
+ [ // 2 — 💳 Criar título (fornecedor Distribuidora Central, R$1000, plano Softwares e Sistemas)
+   ['out','menu'],
+   ['inb','O que vamos fazer, chefe? 🪄',['Pedido de insumo','Vale','Título']],
+   ['pick','Título'],
+   ['inb','O título é parcelado (mais de uma parcela)?',['Sim','Não']],
+   ['pick','Não'],
+   ['inb','Tem mais de um plano de conta (rateio)?',['Sim','Não']],
+   ['pick','Não'],
+   ['inl','Qual fornecedor?','Ver fornecedores'],
+   ['pick','Distribuidora Central'],
+   ['in','Título para *Distribuidora Central*.\n\nQual o valor? (ex: 150 ou 1.250,00)'],
+   ['out','1000'],
+   ['in','Valor: *R$ 1.000,00*\n\nQual a data de vencimento? (ex: 25/06)'],
+   ['out','27/06'],
+   ['inb','De qual mês é essa conta? (competência)',['Este mês (06/2026)','Mês passado (05/2026)','Outro mês']],
+   ['pick','Este mês (06/2026)'],
+   ['inl','Qual plano de conta?','Ver planos'],
+   ['pick','Softwares e Sistemas'],
+   ['inb','Título criado:\n\nFornecedor: *Distribuidora Central*\nValor: *R$ 1.000,00*\nVencimento: *27/06/2026*\nCompetência: *06/2026*\nPlano: *Softwares e Sistemas*\n\nO que deseja fazer?',['Pagar agora','Agendar','Só registrar']],
+   ['pick','Pagar agora'],
+   ['inb','Chave PIX cadastrada para *Distribuidora Central*:\n`108••••6720`\n\nUsamos essa ou prefere digitar outra?',['Usar essa','Outra chave']],
+   ['pick','Usar essa'],
+   ['inb','Confirmar pagamento de *R$ 1.000,00* para:\n\nFornecedor: *Distribuidora Central*\nChave PIX: 108••••6720\nDono da chave: *JOÃO DA SILVA* · Sicoob\nData: *hoje*\n\nO PIX sai imediatamente. Confirma?',['Confirmar pagamento','Cancelar pagamento']],
+   ['pick','Confirmar pagamento'],
+   ['ok','Título criado e pago! ✅ R$ 1.000,00 para *Distribuidora Central*.\nO cron Inter concilia no extrato automaticamente.'],
+ ],
+ [ // 3 — 🎟️ Vale (entregador, R$500, chave Caixa)
+   ['out','menu'],
+   ['inb','O que vamos fazer, chefe? 🪄',['Pedido de insumo','Vale','Título']],
+   ['pick','Vale'],
+   ['inb','Vale pra quem?',['Funcionário','Entregador']],
+   ['pick','Entregador'],
+   ['inl','Qual entregador?','Ver entregadores'],
+   ['pick','Carlos Pereira'],
+   ['in','Vale para *Carlos Pereira*.\n\nQual o valor? (ex: 50 ou 150,00)\n_Teto: R$ 500,00_'],
+   ['out','500'],
+   ['inb','Chave PIX cadastrada para *Carlos Pereira*:\n`123••••4567`\n\nUsamos essa ou prefere digitar outra?',['Usar essa','Outra chave']],
+   ['pick','Usar essa'],
+   ['inb','É pra *CARLOS PEREIRA* · Caixa Econômica? Confirma?',['Confirmar','Trocar chave']],
+   ['pick','Confirmar'],
+   ['ok','Vale pago! ✅ R$ 500,00 para *Carlos Pereira*.\nCai no extrato em instantes — concilio pelo sistema depois.'],
+ ],
+];
+
+const TMS=['16:25','16:26','16:27','16:28'];
+function tm(i){return '<span class="tm">'+TMS[i]+'</span>';}
+function fmt(s){
+  return s
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*([^*]+)\*/g,'<b>$1</b>')
+    .replace(/_([^_]+)_/g,'<i>$1</i>')
+    .replace(/`([^`]+)`/g,'<span class="code">$1</span>')
+    .replace(/\n/g,'<br>');
+}
+function scroll(chat){chat.scrollTop=chat.scrollHeight;}
+function addTyping(chat){const t=document.createElement('div');t.className='typing';t.innerHTML='<i></i><i></i><i></i>';chat.appendChild(t);scroll(chat);return t;}
+
+async function addStep(chat,s,idx){
+  const kind=s[0];
+  if(kind==='ph'){ chat.insertAdjacentHTML('beforeend',PHOTO); scroll(chat); await wait(420); return; }
+  if(kind==='out'||kind==='pick'){
+    await wait(340+Math.random()*220);
+    const el=document.createElement('div'); el.className='bub out';
+    el.innerHTML=fmt(s[1])+tm(idx); chat.appendChild(el); scroll(chat); await wait(320); return;
+  }
+  // mensagens do Magus: indicador de "digitando" primeiro
+  const t=addTyping(chat); await wait(600+Math.random()*360); t.remove();
+  if(kind==='ok'){
+    const el=document.createElement('div'); el.className='bub in ok'; el.innerHTML=fmt(s[1]);
+    chat.appendChild(el); scroll(chat); await wait(440); return;
+  }
+  const el=document.createElement('div'); el.className='bub in'; el.innerHTML=fmt(s[1])+tm(idx);
+  chat.appendChild(el);
+  if(kind==='inb'){ const c=document.createElement('div'); c.className='wabtns'; c.innerHTML=s[2].map(b=>'<div class="wabtn">'+b+'</div>').join(''); chat.appendChild(c); }
+  if(kind==='inl'){ const c=document.createElement('div'); c.className='wabtns'; c.innerHTML='<div class="wabtn list">▤ '+s[2]+'</div>'; chat.appendChild(c); }
+  scroll(chat); await wait(420);
+}
+
+// cada celular roda em loop independente — nenhum congela esperando o outro
+async function playPhoneLoop(idx,seq,start){
+  const chat=document.getElementById('chat'+idx);
+  await wait(start);
+  while(true){
+    chat.innerHTML='';
+    for(const s of seq){ await addStep(chat,s,idx); }
+    await wait(2800);   // segura o resultado final visível antes de recomeçar
+  }
+}
+
+// legendas em timeline própria, soltas dos fluxos
+async function captionLoop(){
+  while(true){
+    caption('Quatro pessoas, quatro pedidos. Tudo no WhatsApp, igual mandar mensagem pra um amigo. 💬');
+    await wait(6000);
+    caption('Menu, perguntas, confirmações: o Magus conduz cada um sozinho.');
+    await wait(6000);
+    caption('Cada "confirmar" já executa no Hub. Você nem abre o sistema. ✨');
+    await wait(6000);
+    caption('Foto vira estoque, pedido vira compra, conta vira título, vale entra na folha. 🪄');
+    await wait(6000);
+  }
+}
+
+window.addEventListener('load',()=>setTimeout(()=>{
+  playPhoneLoop(0,SEQ[0],0);
+  playPhoneLoop(1,SEQ[1],400);
+  playPhoneLoop(2,SEQ[2],800);
+  playPhoneLoop(3,SEQ[3],1200);
+  captionLoop();
+},500));
+</script>
+</body>
+</html>

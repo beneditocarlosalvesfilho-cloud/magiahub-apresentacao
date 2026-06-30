@@ -1,0 +1,337 @@
+<!doctype html>
+<!-- impeccable-disable em-dash-overuse — remaining em-dashes are the title separator, empty-cell "—" placeholders in the contagem table, and JS code comments; visible body prose has none. Standalone presentation doc rendered in an iframe. -->
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — Estoque · CMV & contagem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--surface-muted:#F3EEE6;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--violet:#9333EA;--plum:#3D2F66;--plum-deep:#2A1F4F;
+  --gold:#E7B43B;--gold-2:#f4c84b;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--warning:#A16207;--warning-bg:#FEF3C7;--danger:#B91C1C;--danger-bg:#FEE2E2;--info:#1D4ED8;
+  --est:#F97316;--est-deep:#C2410E;--est-soft:#FFF1E7;--est-line:#FBD9BF;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;overflow:hidden}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+*{scrollbar-width:none}*::-webkit-scrollbar{width:0;height:0;display:none}
+.wrap{max-width:1180px;margin:0 auto;padding:12px 24px}
+.scene-head{margin-bottom:8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--est-deep);padding:5px 12px;border-radius:var(--r-full);border:1px solid var(--est-line);background:var(--est-soft)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--est);animation:pulse 1.8s infinite}
+.scene-title{font-family:"Anton";font-size:clamp(24px,3vw,40px);margin:8px 0 0;text-transform:uppercase;color:var(--plum)}
+.scene-title .hl{color:var(--est-deep)}
+.scene-sub{margin:6px 0 0;max-width:660px;font-size:13.5px;color:var(--fg-2);line-height:1.45}
+.scene-sub b{color:var(--plum)}
+.appwin{position:relative;margin-top:10px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 200px);min-height:440px;max-height:700px;display:flex;flex-direction:column}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--est) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+/* ====== conteúdo da tela ====== */
+.dash{display:flex;flex-direction:column;gap:14px;padding:18px 22px 20px;height:100%;overflow:hidden}
+
+/* topo: faixa do módulo */
+.modbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.modbar .left{display:flex;align-items:center;gap:11px}
+.modbar .ic{width:36px;height:36px;border-radius:10px;background:var(--est-soft);border:1px solid var(--est-line);
+  display:flex;align-items:center;justify-content:center;font-size:19px}
+.modbar .ttl{font-weight:900;font-size:15px;color:var(--plum);letter-spacing:.01em}
+.modbar .ttl small{display:block;font-weight:700;font-size:10.5px;color:var(--fg-3);letter-spacing:.04em;text-transform:uppercase;margin-top:1px}
+.live{display:inline-flex;align-items:center;gap:7px;font-size:11px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+  color:var(--success);background:var(--success-bg);border:1px solid color-mix(in srgb,var(--success) 30%,transparent);
+  padding:6px 12px;border-radius:var(--r-full)}
+.live .blip{width:8px;height:8px;border-radius:50%;background:var(--success);animation:blip 1.3s infinite}
+@keyframes blip{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.25;transform:scale(.7)}}
+
+/* KPIs */
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}
+.kpi{position:relative;border:1px solid var(--border);border-radius:var(--r-card);padding:15px 17px;background:var(--surface);overflow:hidden;transition:box-shadow .4s ease,transform .4s ease,border-color .4s ease}
+.kpi .k{font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3);font-weight:800;display:flex;align-items:center;gap:6px}
+.kpi .v{font-family:"Anton";font-size:clamp(28px,3.4vw,40px);margin-top:8px;line-height:.92;color:var(--plum)}
+.kpi .foot{margin-top:7px;font-size:11px;font-weight:700;color:var(--fg-2);display:flex;align-items:center;gap:6px}
+.kpi.est .v{color:var(--est-deep)}
+.kpi.green .v{color:var(--success)}
+.kpi.red .v{color:var(--danger)}
+.kpi .seal{font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--est-deep);
+  background:var(--est-soft);border:1px solid var(--est-line);border-radius:var(--r-full);padding:3px 8px;display:inline-flex;align-items:center;gap:4px}
+.kpi .ok{color:var(--success)}
+/* pulso ouro/laranja ao atualizar */
+.kpi.bump{animation:bump .9s cubic-bezier(.22,1,.36,1)}
+@keyframes bump{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--gold) 60%,transparent);transform:translateY(0)}
+  35%{box-shadow:0 0 0 5px color-mix(in srgb,var(--est) 30%,transparent);transform:translateY(-3px);border-color:var(--est)}
+  100%{box-shadow:0 0 0 0 transparent;transform:translateY(0)}}
+/* shimmer no card de custo médio */
+.kpi.custo{background:linear-gradient(180deg,var(--surface),var(--est-soft))}
+.kpi.custo::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 25%,color-mix(in srgb,var(--gold) 32%,transparent) 48%,transparent 72%);
+  transform:translateX(-120%);animation:shimmer 3.4s ease-in-out infinite}
+@keyframes shimmer{0%{transform:translateX(-120%)}55%,100%{transform:translateX(120%)}}
+.kpi.custo .v{font-family:"Anton";font-size:24px;color:var(--est-deep)}
+.kpi.custo .vrow{display:flex;align-items:baseline;gap:8px;margin-top:8px}
+.kpi.custo .ckpi{font-family:"Anton";font-size:34px;color:var(--success);line-height:.9}
+
+/* painel de contagem */
+.panel{flex:1;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:var(--r-card);background:var(--surface);overflow:hidden;min-height:0}
+.phead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px;border-bottom:1px solid var(--border);background:var(--surface-2)}
+.phead .tt{font-weight:900;font-size:14px;color:var(--plum);display:flex;align-items:center;gap:8px}
+.phead .badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--est-deep);background:var(--est-soft);border:1px solid var(--est-line);border-radius:var(--r-full);padding:3px 10px}
+.pbody{flex:1;overflow:auto;padding:4px 6px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+thead th{position:sticky;top:0;background:var(--surface);text-align:left;padding:9px 14px;font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-3);z-index:2}
+thead th.r{text-align:right}
+tbody td{padding:11px 14px;border-top:1px solid var(--border);vertical-align:middle}
+tbody td.r{text-align:right;font-variant-numeric:tabular-nums}
+.ins{display:flex;align-items:center;gap:10px;font-weight:700;color:var(--fg)}
+.ins .e{font-size:19px}
+.ins small{display:block;font-weight:600;font-size:10.5px;color:var(--fg-3);margin-top:1px}
+.sis{font-weight:700;color:var(--fg-2)}
+.cnt{display:inline-flex;align-items:center;justify-content:flex-end;min-width:74px;height:34px;padding:0 12px;border:1px solid var(--border);
+  border-radius:10px;background:var(--surface);font-variant-numeric:tabular-nums;font-weight:800;color:var(--fg-3);transition:all .3s ease}
+.cnt.filled{color:var(--fg);border-color:color-mix(in srgb,var(--est) 50%,transparent);background:var(--est-soft)}
+.cnt.fill-cursor{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 48%,transparent)}
+.adj{font-weight:900;font-variant-numeric:tabular-nums;opacity:0;transition:opacity .35s ease}
+.adj.on{opacity:1}
+.adj.zero{color:var(--success)}
+.adj.pos{color:var(--success)}
+.adj.neg{color:var(--danger)}
+.adj .pill{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;padding:3px 9px;border-radius:var(--r-full)}
+.adj.pos .pill{background:var(--success-bg);color:var(--success)}
+.adj.neg .pill{background:var(--danger-bg);color:var(--danger)}
+.adj.zero .pill{background:var(--surface-muted);color:var(--fg-3)}
+
+/* rodapé do painel: selo ledger + botão */
+.pfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px;border-top:1px solid var(--border);background:var(--surface-2)}
+.ledger{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700;color:var(--fg-2);transition:all .4s ease;border-radius:10px;padding:6px 10px}
+.ledger.glow{background:var(--est-soft);box-shadow:0 0 0 2px color-mix(in srgb,var(--est) 35%,transparent)}
+.ledger .e{font-size:17px}
+.ledger b{color:var(--plum)}
+.ledger .sub{display:block;font-weight:600;font-size:10.5px;color:var(--fg-3);margin-top:1px}
+.btn{font-family:inherit;font-weight:900;font-size:13.5px;border:none;border-radius:10px;padding:11px 20px;cursor:pointer;
+  background:var(--est);color:#fff;box-shadow:0 8px 20px -4px color-mix(in srgb,var(--est) 60%,transparent);display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.btn.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 60%,transparent),0 8px 20px -4px color-mix(in srgb,var(--est) 60%,transparent)}
+
+/* ---- cursor + ripple + caption (NÃO MUDE) ---- */
+.cursor{position:absolute;z-index:90;left:50%;top:50%;width:22px;height:22px;pointer-events:none;transition:left .7s cubic-bezier(.5,0,.2,1),top .7s cubic-bezier(.5,0,.2,1);filter:drop-shadow(0 2px 3px rgba(40,31,79,.4))}
+.cursor.click{animation:clk .4s ease}
+@keyframes clk{0%,100%{transform:scale(1)}45%{transform:scale(.7)}}
+.ripple{position:absolute;z-index:89;width:32px;height:32px;border-radius:50%;border:2px solid var(--est);transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none}
+.ripple.go{animation:rip .5s ease-out}
+@keyframes rip{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}}
+.caption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:10px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:88%;text-align:left;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--est);flex-shrink:0;animation:pulse 1.8s infinite}
+.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 55%,transparent)!important}
+/* ---- embed: preenche a tela ---- */
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+@media(max-width:760px){.kpis{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <span class="kicker"><span class="d"></span> Estoque · CMV & contagem </span>
+    <h1 class="scene-title">A verdade do custo, <span class="hl">automática.</span></h1>
+    <p class="scene-sub">Cada entrada e saída fica gravada pra sempre num <b>livro imutável</b>. Você confere o físico na contagem e o <b>custo médio se recalcula sozinho</b>, até o centavo.</p>
+  </div>
+
+  <div class="appwin" id="app">
+    <div class="dash">
+
+      <!-- faixa do módulo -->
+      <div class="modbar">
+        <div class="left">
+          <div class="ic">📦</div>
+          <div class="ttl">Estoque · Mage Burger<small>Dashboard de custo</small></div>
+        </div>
+        <span class="live"><span class="blip"></span> Ao vivo</span>
+      </div>
+
+      <!-- KPIs -->
+      <div class="kpis">
+        <div class="kpi est" id="k-valor">
+          <div class="k">💰 Valor em estoque</div>
+          <div class="v mono" id="v-valor">R$ 38.420</div>
+          <div class="foot">📊 ledger derivado</div>
+        </div>
+        <div class="kpi" id="k-cmv">
+          <div class="k">📉 CMV do mês</div>
+          <div class="v mono" id="v-cmv">31,2%</div>
+          <div class="foot">sobre o faturamento</div>
+        </div>
+        <div class="kpi red" id="k-quebra">
+          <div class="k">🩹 Quebra (perdas)</div>
+          <div class="v mono" id="v-quebra">R$ 412</div>
+          <div class="foot">divergências do mês</div>
+        </div>
+        <div class="kpi custo" id="k-custo">
+          <div class="k">⚖️ Custo médio</div>
+          <div class="vrow"><span class="v mono" id="v-custo">R$ 4,12</span><span style="font-size:11px;font-weight:700;color:var(--fg-3)">/ hambúrguer</span></div>
+          <div class="foot"><span class="seal">📒 recalculado sozinho</span></div>
+        </div>
+      </div>
+
+      <!-- painel de contagem -->
+      <div class="panel">
+        <div class="phead">
+          <div class="tt">🔢 Contagem física · Depósito<span class="badge">auditoria</span></div>
+          <span class="badge" style="color:var(--info);background:color-mix(in srgb,var(--info) 10%,transparent);border-color:color-mix(in srgb,var(--info) 30%,transparent)">Sistema × físico</span>
+        </div>
+        <div class="pbody">
+          <table>
+            <thead>
+              <tr><th>Insumo</th><th class="r">Sistema</th><th class="r">Contado</th><th class="r">Ajuste</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><div class="ins"><span class="e">🥩</span><div>Hambúrguer 150g<small>un · pç</small></div></div></td>
+                <td class="r sis mono">48</td>
+                <td class="r"><span class="cnt" id="c-burg">—</span></td>
+                <td class="r"><span class="adj" id="a-burg"><span class="pill">—</span></span></td>
+              </tr>
+              <tr>
+                <td><div class="ins"><span class="e">🧀</span><div>Queijo cheddar<small>un · fatia</small></div></div></td>
+                <td class="r sis mono">120</td>
+                <td class="r"><span class="cnt" id="c-cheddar">—</span></td>
+                <td class="r"><span class="adj" id="a-cheddar"><span class="pill">—</span></span></td>
+              </tr>
+              <tr>
+                <td><div class="ins"><span class="e">🍟</span><div>Batata congelada<small>kg</small></div></div></td>
+                <td class="r sis mono">22</td>
+                <td class="r"><span class="cnt filled" id="c-batata">22</span></td>
+                <td class="r"><span class="adj zero on" id="a-batata"><span class="pill">✓ ok</span></span></td>
+              </tr>
+              <tr>
+                <td><div class="ins"><span class="e">🫙</span><div>Maionese da casa<small>kg · ficha técnica</small></div></div></td>
+                <td class="r sis mono">9</td>
+                <td class="r"><span class="cnt filled" id="c-maio">9</span></td>
+                <td class="r"><span class="adj zero on" id="a-maio"><span class="pill">✓ ok</span></span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="pfoot">
+          <div class="ledger" id="ledger">
+            <span class="e">📒</span>
+            <div><b>Cada entrada e saída fica gravada pra sempre.</b><span class="sub">Custo médio recalculado sozinho · livro imutável</span></div>
+          </div>
+          <button class="btn" id="btn-fin">✅ Finalizar contagem</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- cursor + caption -->
+    <div class="ripple" id="ripple"></div>
+    <svg class="cursor" id="cursor" viewBox="0 0 24 24" fill="var(--plum-deep)" stroke="#fff" stroke-width="1.5"><path d="M4 2 L4 18 L8.5 14 L11 20 L14 18.5 L11.5 12.5 L18 12.5 Z"/></svg>
+    <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+  </div>
+</div>
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+const app=document.getElementById('app'),cursor=document.getElementById('cursor'),ripple=document.getElementById('ripple');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+function hideCap(){capEl.classList.remove('show');}
+function rectIn(el){const a=app.getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left-a.left+r.width/2,y:r.top-a.top+r.height/2};}
+async function moveTo(el){if(!el)return;const p=rectIn(el);cursor.style.left=(p.x-2)+'px';cursor.style.top=(p.y-2)+'px';await wait(740);}
+async function click(el){if(!el)return;const p=rectIn(el);ripple.style.left=p.x+'px';ripple.style.top=p.y+'px';cursor.classList.add('click');ripple.classList.remove('go');void ripple.offsetWidth;ripple.classList.add('go');if(el.classList)el.classList.add('flash');await wait(420);cursor.classList.remove('click');if(el.classList)setTimeout(()=>el.classList.remove('flash'),500);}
+async function type(el,txt){el.textContent='';for(let i=1;i<=txt.length;i++){el.textContent=txt.slice(0,i);await wait(34);}}
+
+const SISTEMA={burg:48,cheddar:120};
+// preenche a célula "Contado" com efeito de digitação + cálculo do ajuste
+async function preencherContado(key,val){
+  const cell=document.getElementById('c-'+key);
+  cell.classList.add('fill-cursor');
+  await type(cell,String(val));
+  cell.classList.add('filled');
+  setTimeout(()=>cell.classList.remove('fill-cursor'),500);
+  const diff=val-SISTEMA[key];
+  const a=document.getElementById('a-'+key);
+  const pill=a.querySelector('.pill');
+  if(diff===0){a.className='adj zero on';pill.textContent='✓ ok';}
+  else if(diff>0){a.className='adj pos on';pill.textContent='⬆ +'+diff;}
+  else{a.className='adj neg on';pill.textContent='⬇ −'+Math.abs(diff);}
+}
+function bump(id){const el=document.getElementById(id);el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump');}
+
+function reset(){
+  ['burg','cheddar'].forEach(k=>{
+    const c=document.getElementById('c-'+k);c.textContent='—';c.className='cnt';
+    const a=document.getElementById('a-'+k);a.className='adj';a.querySelector('.pill').textContent='—';
+  });
+  document.getElementById('v-valor').textContent='R$ 38.420';
+  document.getElementById('v-cmv').textContent='31,2%';
+  document.getElementById('v-quebra').textContent='R$ 412';
+  document.getElementById('v-custo').textContent='R$ 4,12';
+  document.getElementById('ledger').classList.remove('glow');
+  document.getElementById('btn-fin').classList.remove('flash');
+  ['k-valor','k-cmv','k-quebra','k-custo'].forEach(id=>document.getElementById(id).classList.remove('bump'));
+}
+
+async function director(){
+  while(true){
+    reset();hideCap();
+    cursor.style.transition='none';const a=app.getBoundingClientRect();cursor.style.left=(a.width*0.5)+'px';cursor.style.top=(a.height*0.45)+'px';void cursor.offsetWidth;cursor.style.transition='';
+    await wait(700);
+
+    // beat 1 — a pergunta de ouro
+    caption('A pergunta de ouro: quanto custa cada prato?');
+    await wait(2300);
+
+    // beat 2 — ledger imutável
+    caption('Cada entrada e saída fica gravada pra sempre. 📒');
+    document.getElementById('ledger').classList.add('glow');
+    bump('k-custo');
+    await wait(2000);
+
+    // beat 3 — confere o físico
+    caption('Confere o físico na contagem…');
+    document.getElementById('ledger').classList.remove('glow');
+    const cBurg=document.getElementById('c-burg');
+    await moveTo(cBurg);await click(cBurg);
+    await preencherContado('burg',50);   // sobra +2
+    await wait(900);
+    const cChe=document.getElementById('c-cheddar');
+    await moveTo(cChe);await click(cChe);
+    await preencherContado('cheddar',119); // perda −1
+    await wait(1100);
+    const btn=document.getElementById('btn-fin');
+    await moveTo(btn);btn.classList.add('flash');await click(btn);
+    await wait(400);
+
+    // beat 4 — custo se calcula sozinho
+    caption('…e o custo se calcula sozinho. Até o centavo. 💎');
+    // valor em estoque ajusta
+    document.getElementById('v-valor').textContent='R$ 38.612';bump('k-valor');
+    await wait(450);
+    // CMV afina pra baixo (a contagem deu mais precisão)
+    document.getElementById('v-cmv').textContent='31,0%';bump('k-cmv');
+    await wait(450);
+    // quebra cai (a sobra compensou)
+    document.getElementById('v-quebra').textContent='R$ 397';bump('k-quebra');
+    await wait(450);
+    // custo médio recalcula até o centavo
+    document.getElementById('v-custo').textContent='R$ 4,09';bump('k-custo');
+    document.getElementById('ledger').classList.add('glow');
+    await wait(3200);
+  }
+}
+window.addEventListener('load',()=>setTimeout(director,600));
+</script>
+</body>
+</html>

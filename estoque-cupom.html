@@ -1,0 +1,265 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — Foto do cupom vira estoque</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--surface-muted:#F3EEE6;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--violet:#9333EA;--plum:#3D2F66;--plum-deep:#2A1F4F;
+  --gold:#E7B43B;--gold-2:#f4c84b;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--warning:#A16207;--warning-bg:#FEF3C7;--danger:#B91C1C;--danger-bg:#FEE2E2;--info:#1D4ED8;
+  --est:#F97316;--est-deep:#C2410E;--est-soft:#FFF1E7;--est-line:#FBD9BF;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;overflow:hidden}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+*{scrollbar-width:none}*::-webkit-scrollbar{width:0;height:0;display:none}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 24px}
+.scene-head{margin-bottom:8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--est-deep);padding:5px 12px;border-radius:var(--r-full);border:1px solid var(--est-line);background:var(--est-soft)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--est);animation:pulse 1.8s infinite}
+.scene-title{font-family:"Anton";font-size:clamp(24px,3vw,40px);margin:8px 0 0;text-transform:uppercase;color:var(--plum)}
+.scene-title .hl{color:var(--est-deep)}
+.scene-sub{margin:6px 0 0;max-width:640px;font-size:13.5px;color:var(--fg-2);line-height:1.45}
+.scene-sub b{color:var(--plum)}
+.appwin{position:relative;margin-top:10px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 200px);min-height:420px;max-height:680px;display:flex;flex-direction:column}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--est) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+/* ===== layout 2 colunas ===== */
+.stage{flex:1;display:grid;grid-template-columns:1fr 1.05fr;gap:14px;padding:16px;min-height:0}
+@media(max-width:560px){.stage{grid-template-columns:1fr 1fr;gap:10px;padding:11px}}
+
+/* ===== ESQUERDA: cupom =====
+   Prop literal: bobininha de papel térmico desenhada em CSS. Os valores fora do
+   design system abaixo (cantos ~quadrados 3px, fonte monospace de impressora,
+   tons de tinta apagada/papel envelhecido) são INTENCIONAIS — fazem o cupom
+   parecer papel impresso, distinto da UI Magus. A UI real da cena (lista de
+   itens extraídos, selos, captions) usa só tokens documentados.
+   impeccable-disable design-system-radius
+   impeccable-disable design-system-font
+   impeccable-disable design-system-color */
+.lcol{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;min-height:0}
+.scanwrap{position:relative;width:100%;max-width:230px}
+.receipt{position:relative;background:#fff;border:1px solid #e7e0d6;border-radius:3px;
+  box-shadow:0 14px 34px -16px rgba(40,31,79,.4);padding:15px 14px 16px;overflow:hidden;
+  font-family:"Courier New",ui-monospace,monospace;color:#23201c;
+  opacity:0;transform:scale(.92) translateY(8px);transition:opacity .55s ease,transform .55s cubic-bezier(.22,1,.36,1)}
+.receipt.on{opacity:1;transform:none}
+/* serrilha topo/baixo */
+.receipt::before,.receipt::after{content:"";position:absolute;left:0;right:0;height:7px;
+  background:radial-gradient(circle at 4px -1px,transparent 4px,#fff 4px);background-size:8px 7px;background-repeat:repeat-x;z-index:2}
+.receipt::before{top:-3px;transform:rotate(180deg)}
+.receipt::after{bottom:-3px}
+.rc-store{text-align:center;font-weight:700;font-size:12.5px;letter-spacing:.04em}
+.rc-meta{text-align:center;font-size:9px;color:#7a756c;margin-top:2px}
+.rc-dash{border:0;border-top:1px dashed #b9b3a8;margin:8px 0}
+.rc-line{display:flex;justify-content:space-between;gap:6px;font-size:10px;line-height:1.65;white-space:nowrap}
+.rc-line .nm{flex:1;overflow:hidden;text-overflow:ellipsis}
+.rc-line .q{color:#8a857b;width:30px;text-align:right}
+.rc-line .vl{width:48px;text-align:right;font-weight:700}
+.rc-total{display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-top:2px}
+.rc-foot{text-align:center;font-size:8.5px;color:#9a958c;margin-top:7px;letter-spacing:.05em}
+
+/* linha de scan — animação herói */
+.scanline{position:absolute;left:-3%;right:-3%;top:0;height:34px;z-index:3;pointer-events:none;opacity:0;transition:opacity .4s}
+.scanline.on{opacity:1}
+.scanline .beam{position:absolute;inset:0;
+  background:linear-gradient(180deg,
+    transparent 0%,
+    color-mix(in srgb,var(--est) 8%,transparent) 28%,
+    color-mix(in srgb,var(--gold-2) 42%,transparent) 50%,
+    color-mix(in srgb,var(--est) 8%,transparent) 72%,
+    transparent 100%);
+  filter:blur(.3px)}
+.scanline .edge{position:absolute;left:0;right:0;top:50%;height:2px;transform:translateY(-50%);
+  background:linear-gradient(90deg,transparent,var(--est) 18%,var(--gold-2) 50%,var(--est) 82%,transparent);
+  box-shadow:0 0 12px 1px color-mix(in srgb,var(--est) 70%,transparent),0 0 22px 3px color-mix(in srgb,var(--gold) 35%,transparent)}
+.scanwrap.scanning .scanline .beam,.scanwrap.scanning .scanline .edge{animation:none}
+.scanwrap.scanning .scanline{animation:sweep 2.1s cubic-bezier(.45,.05,.55,.95) infinite}
+@keyframes sweep{0%{top:-12%}50%{top:92%}100%{top:-12%}}
+
+/* selo "lendo" */
+.reading{display:inline-flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;
+  color:var(--est-deep);background:var(--est-soft);border:1px solid var(--est-line);
+  border-radius:var(--r-full);padding:5px 12px;opacity:0;transform:translateY(4px);transition:all .35s ease}
+.reading.on{opacity:1;transform:none;animation:readpulse 1.4s ease-in-out infinite}
+@keyframes readpulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--est) 40%,transparent)}50%{box-shadow:0 0 0 7px transparent}}
+.reading .w{font-size:13px;animation:wand 1.2s ease-in-out infinite}
+@keyframes wand{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(10deg)}}
+/* selo da integração Gemini (crédito + cota grátis) */
+.geminichip{display:inline-flex;align-items:center;gap:7px;font-size:10px;font-weight:800;text-align:center;
+  color:var(--info);background:color-mix(in srgb,var(--info) 8%,transparent);
+  border:1px solid color-mix(in srgb,var(--info) 26%,transparent);border-radius:var(--r-full);padding:5px 12px}
+.geminichip .s{animation:wand 1.4s ease-in-out infinite}
+
+/* ===== DIREITA: itens extraídos ===== */
+.rcol{display:flex;flex-direction:column;min-height:0}
+.rcol-head{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--fg-3);margin-bottom:9px}
+.rcol-head .ar{color:var(--est);font-size:14px;animation:arr 1.4s ease-in-out infinite}
+@keyframes arr{0%,100%{transform:translateX(0)}50%{transform:translateX(3px)}}
+.items{display:flex;flex-direction:column;gap:8px}
+.item{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);
+  border-radius:11px;padding:9px 11px;opacity:0;transform:translateX(14px) scale(.96);
+  transition:opacity .4s ease,transform .4s cubic-bezier(.22,1,.36,1)}
+.item.pop{opacity:1;transform:none}
+.item.pop{animation:itpop .5s cubic-bezier(.22,1,.36,1)}
+@keyframes itpop{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--est) 55%,transparent)}100%{box-shadow:0 0 0 9px transparent}}
+.item .ie{font-size:20px;flex-shrink:0}
+.item .icol{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.item .nm{font-size:12.5px;font-weight:700;color:var(--plum);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .meta{font-size:10.5px;color:var(--fg-3);font-weight:600}
+.item .qty{font-size:11px;font-weight:800;color:var(--est-deep);background:var(--est-soft);
+  border:1px solid var(--est-line);border-radius:var(--r-full);padding:3px 9px;white-space:nowrap;font-variant-numeric:tabular-nums}
+
+/* selo verde final */
+.done{margin-top:11px;display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:12px;font-weight:800;color:var(--success);background:var(--success-bg);
+  border:1px solid color-mix(in srgb,var(--success) 35%,transparent);border-radius:var(--r-full);
+  padding:8px 14px;opacity:0;transform:scale(.9);transition:all .4s cubic-bezier(.22,1,.36,1)}
+.done.on{opacity:1;transform:none}
+.done .ck{font-size:15px}
+
+/* ---- cursor + ripple + caption (NÃO MUDE) ---- */
+.cursor{position:absolute;z-index:90;left:50%;top:50%;width:22px;height:22px;pointer-events:none;transition:left .7s cubic-bezier(.5,0,.2,1),top .7s cubic-bezier(.5,0,.2,1);filter:drop-shadow(0 2px 3px rgba(40,31,79,.4))}
+.cursor.click{animation:clk .4s ease}
+@keyframes clk{0%,100%{transform:scale(1)}45%{transform:scale(.7)}}
+.ripple{position:absolute;z-index:89;width:32px;height:32px;border-radius:50%;border:2px solid var(--est);transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none}
+.ripple.go{animation:rip .5s ease-out}
+@keyframes rip{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}}
+.caption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:10px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:88%;text-align:left;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--est);flex-shrink:0;animation:pulse 1.8s infinite}
+.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 55%,transparent)!important}
+/* ---- embed: preenche a tela ---- */
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <span class="kicker"><span class="d"></span> Estoque · Cupom (foto)</span>
+    <h1 class="scene-title">Foto do cupom, <span class="hl">e pronto.</span></h1>
+    <p class="scene-sub">Tirou a foto da bobininha do mercado? A <b>IA do Gemini</b> lê item, quantidade e valor sozinha e já lança no estoque. <b>Até 1.000 fotos por mês, grátis.</b></p>
+  </div>
+  <div class="appwin" id="app">
+
+    <div class="stage">
+      <!-- ESQUERDA: cupom + scan -->
+      <div class="lcol">
+        <div class="scanwrap" id="scanwrap">
+          <div class="receipt" id="receipt">
+            <div class="rc-store">SUPERMERCADO XYZ</div>
+            <div class="rc-meta">CNPJ ••.•••.•••/0001-•• · 28/06</div>
+            <hr class="rc-dash"/>
+            <div class="rc-line"><span class="nm">OLEO SOJA 900ML</span><span class="q">x6</span><span class="vl">53,40</span></div>
+            <div class="rc-line"><span class="nm">OVO BCO DZ</span><span class="q">x10</span><span class="vl">79,00</span></div>
+            <div class="rc-line"><span class="nm">ACUCAR 5KG</span><span class="q">x4</span><span class="vl">89,60</span></div>
+            <div class="rc-line"><span class="nm">SAL REFINADO</span><span class="q">x8</span><span class="vl">23,20</span></div>
+            <hr class="rc-dash"/>
+            <div class="rc-total"><span>TOTAL R$</span><span>245,20</span></div>
+            <div class="rc-foot">NFC-e ••••&nbsp;••••&nbsp;••••</div>
+          </div>
+          <div class="scanline" id="scanline"><div class="beam"></div><div class="edge"></div></div>
+        </div>
+        <div class="reading" id="reading"><span class="w">🪄</span> lendo o cupom…</div>
+        <div class="geminichip"><span class="s">✨</span> Lê com IA · Gemini · 1.000 fotos/mês grátis</div>
+      </div>
+
+      <!-- DIREITA: itens extraídos -->
+      <div class="rcol">
+        <div class="rcol-head"><span class="ar">➜</span> Itens extraídos</div>
+        <div class="items" id="items">
+          <div class="item" data-i="0"><span class="ie">🛢️</span><div class="icol"><span class="nm">Óleo de soja</span><span class="meta">R$ 8,90 / un</span></div><span class="qty">6 un</span></div>
+          <div class="item" data-i="1"><span class="ie">🥚</span><div class="icol"><span class="nm">Ovos</span><span class="meta">R$ 7,90 / dz</span></div><span class="qty">10 dz</span></div>
+          <div class="item" data-i="2"><span class="ie">🍬</span><div class="icol"><span class="nm">Açúcar</span><span class="meta">R$ 22,40 / sc</span></div><span class="qty">4 sc</span></div>
+          <div class="item" data-i="3"><span class="ie">🧂</span><div class="icol"><span class="nm">Sal</span><span class="meta">R$ 2,90 / un</span></div><span class="qty">8 un</span></div>
+        </div>
+        <div class="done" id="done"><span class="ck">✅</span> 4 itens no estoque</div>
+      </div>
+    </div>
+
+    <!-- cursor + caption (sempre por último, dentro do #app) -->
+    <div class="ripple" id="ripple"></div>
+    <svg class="cursor" id="cursor" viewBox="0 0 24 24" fill="var(--plum-deep)" stroke="#fff" stroke-width="1.5"><path d="M4 2 L4 18 L8.5 14 L11 20 L14 18.5 L11.5 12.5 L18 12.5 Z"/></svg>
+    <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+  </div>
+</div>
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+const app=document.getElementById('app'),cursor=document.getElementById('cursor'),ripple=document.getElementById('ripple');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+function hideCap(){capEl.classList.remove('show');}
+function rectIn(el){const a=app.getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left-a.left+r.width/2,y:r.top-a.top+r.height/2};}
+async function moveTo(el){if(!el)return;const p=rectIn(el);cursor.style.left=(p.x-2)+'px';cursor.style.top=(p.y-2)+'px';await wait(740);}
+async function click(el){if(!el)return;const p=rectIn(el);ripple.style.left=p.x+'px';ripple.style.top=p.y+'px';cursor.classList.add('click');ripple.classList.remove('go');void ripple.offsetWidth;ripple.classList.add('go');if(el.classList)el.classList.add('flash');await wait(420);cursor.classList.remove('click');if(el.classList)setTimeout(()=>el.classList.remove('flash'),500);}
+
+const receipt=document.getElementById('receipt');
+const scanwrap=document.getElementById('scanwrap');
+const scanline=document.getElementById('scanline');
+const reading=document.getElementById('reading');
+const done=document.getElementById('done');
+const itemEls=[...document.querySelectorAll('#items .item')];
+
+function reset(){
+  receipt.classList.remove('on');
+  scanwrap.classList.remove('scanning');
+  scanline.classList.remove('on');
+  reading.classList.remove('on');
+  done.classList.remove('on');
+  itemEls.forEach(el=>el.classList.remove('pop'));
+}
+
+async function director(){
+  while(true){
+    reset(); hideCap();
+    cursor.style.transition='none';const a=app.getBoundingClientRect();cursor.style.left=(a.width*0.5)+'px';cursor.style.top=(a.height*0.45)+'px';void cursor.offsetWidth;cursor.style.transition='';
+    await wait(700);
+
+    // 1 — tira a foto, cupom aparece
+    caption('Compra de última hora no mercado? Só tira a foto do cupom. 📸');
+    await wait(300);
+    receipt.classList.add('on');
+    await wait(2200);
+
+    // 2 — Magus lê: scan varre + selo pulsa
+    caption('A IA lê a bobininha inteira sozinha. Item, quantidade, preço. 🪄');
+    scanline.classList.add('on');
+    scanwrap.classList.add('scanning');
+    reading.classList.add('on');
+    await wait(1200);
+
+    // 3 — itens fazem pop um a um conforme o scan passa
+    caption('Nada de digitar produto por produto. A foto fez o trabalho.');
+    for(const el of itemEls){ el.classList.add('pop'); await wait(420); }
+    await wait(900);
+
+    // 4 — já entrou no estoque
+    caption('E já entrou no estoque. A bobininha virou dado. ✨');
+    reading.classList.remove('on');
+    done.classList.add('on');
+    await wait(3000);
+  }
+}
+window.addEventListener('load',()=>setTimeout(director,600));
+</script>
+</body>
+</html>

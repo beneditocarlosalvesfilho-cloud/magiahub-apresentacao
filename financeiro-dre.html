@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — DRE automática</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--surface-muted:#F3EEE6;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--violet:#9333EA;--plum:#3D2F66;--plum-deep:#2A1F4F;
+  --gold:#E7B43B;--gold-2:#f4c84b;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--warning:#A16207;--warning-bg:#FEF3C7;--danger:#B91C1C;--danger-bg:#FEE2E2;--info:#1D4ED8;
+  --fin:#16A34A;--fin-deep:#15803D;--fin-soft:#E7F6EC;--fin-line:#BBE7C8;
+  --inter:#FF7A00;--inter-soft:#FFF0E2;--inter-line:#FFD2A8;
+  --sicoob:#00AE9D;--sicoob-soft:#E1F7F4;--sicoob-line:#A8E6DE;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;overflow:hidden}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+*{scrollbar-width:none}*::-webkit-scrollbar{width:0;height:0;display:none}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 24px}
+.scene-head{margin-bottom:8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--fin-deep);padding:5px 12px;border-radius:var(--r-full);border:1px solid var(--fin-line);background:var(--fin-soft)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--fin);animation:pulse 1.8s infinite}
+.scene-title{font-family:"Anton";font-size:clamp(24px,3vw,40px);margin:8px 0 0;text-transform:uppercase;color:var(--plum)}
+.scene-title .hl{color:var(--fin-deep)}
+.scene-sub{margin:6px 0 0;max-width:640px;font-size:13.5px;color:var(--fg-2);line-height:1.45}
+.scene-sub b{color:var(--plum)}
+.appwin{position:relative;margin-top:10px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 200px);min-height:420px;max-height:680px;display:flex;flex-direction:column}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--fin) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+.body{flex:1;min-height:0;overflow:hidden;padding:16px 18px;display:flex;flex-direction:column;justify-content:center}
+.dre{border:1px solid var(--border);border-radius:16px;background:var(--surface);overflow:hidden;
+  box-shadow:0 12px 30px -20px rgba(40,31,79,.3);max-width:560px;margin:0 auto;width:100%}
+.dhead{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,var(--fin-soft),transparent)}
+.dhead .t{font-weight:900;color:var(--fin-deep);font-size:14px;display:flex;align-items:center;gap:8px}
+.dhead .per{font-size:11px;color:var(--fg-3);font-weight:700}
+.drow{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid var(--border);
+  opacity:0;transform:translateY(-7px);transition:opacity .45s ease,transform .45s cubic-bezier(.22,1,.36,1)}
+.drow:last-child{border-bottom:none}
+.drow.on{opacity:1;transform:none}
+.drow .op{width:18px;font-weight:900;color:var(--fg-3);text-align:center;flex-shrink:0;font-size:14px}
+.drow .nm{flex:1;font-weight:700;font-size:12.5px;color:var(--fg)}
+.srcs{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.src{font-size:9px;font-weight:800;border-radius:999px;padding:2px 7px;white-space:nowrap;transition:box-shadow .3s}
+.src.pulse{animation:srcpulse 1.4s ease-in-out infinite}
+@keyframes srcpulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 4px color-mix(in srgb,var(--gold) 40%,transparent);transform:translateY(-1px)}}
+.src.vend{color:var(--fin-deep);background:var(--fin-soft);border:1px solid var(--fin-line)}
+.src.est{color:#C2410E;background:#FFF1E7;border:1px solid #FBD9BF}
+.src.cart{color:var(--purple);background:#efe7fd;border:1px solid #ddd0f7}
+.src.banco{color:var(--sicoob);background:var(--sicoob-soft);border:1px solid var(--sicoob-line)}
+.src.folha{color:#A16207;background:#FEF3C7;border:1px solid #f3e0a0}
+.drow .vl{font-weight:800;font-size:13px;font-variant-numeric:tabular-nums;color:var(--fg);min-width:104px;text-align:right}
+.drow.neg .vl{color:var(--danger)}
+.drow.sub{background:var(--surface-2)}
+.drow.sub .nm{font-weight:900;color:var(--plum)}
+.drow.sub .vl{font-weight:900;color:var(--plum)}
+.drow.result{background:var(--fin-soft);border-top:2px solid var(--fin-line);padding:14px 16px}
+.drow.result .nm{font-weight:900;color:var(--fin-deep);font-size:13px}
+.drow.result .vl{font-family:"Anton";font-size:26px;color:var(--fin-deep);min-width:130px}
+.drow.result.on{animation:resglow .7s ease-out}
+@keyframes resglow{0%{box-shadow:inset 0 0 0 0 transparent}40%{box-shadow:inset 0 0 0 3px color-mix(in srgb,var(--fin) 45%,transparent)}100%{box-shadow:inset 0 0 0 0 transparent}}
+
+.cursor{position:absolute;z-index:90;left:50%;top:50%;width:22px;height:22px;pointer-events:none;transition:left .7s cubic-bezier(.5,0,.2,1),top .7s cubic-bezier(.5,0,.2,1);filter:drop-shadow(0 2px 3px rgba(40,31,79,.4))}
+.cursor.click{animation:clk .4s ease}
+@keyframes clk{0%,100%{transform:scale(1)}45%{transform:scale(.7)}}
+.ripple{position:absolute;z-index:89;width:32px;height:32px;border-radius:50%;border:2px solid var(--fin);transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none}
+.ripple.go{animation:rip .5s ease-out}
+@keyframes rip{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}}
+.caption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:10px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:88%;text-align:left;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--fin);flex-shrink:0;animation:pulse 1.8s infinite}
+.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 55%,transparent)!important}
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <span class="kicker"><span class="d"></span> Financeiro · DRE </span>
+    <h1 class="scene-title">A DRE <span class="hl">se monta sozinha.</span></h1>
+    <p class="scene-sub">Cada lançamento já entra classificado — banco, cartão, estoque e folha caem na DRE sem você apontar nada.</p>
+  </div>
+  <div class="appwin" id="app">
+    <div class="body">
+      <div class="dre">
+        <div class="dhead"><span class="t">📊 DRE · resultado do mês</span><span class="per">Junho/2026</span></div>
+        <div class="drow" data-r><span class="op">+</span><span class="nm">Receita bruta</span><span class="srcs"><span class="src vend">vendas</span></span><span class="vl mono">R$ 184.200</span></div>
+        <div class="drow neg" data-r><span class="op">−</span><span class="nm">CMV (custo da mercadoria)</span><span class="srcs"><span class="src est">📦 estoque</span></span><span class="vl mono">R$ 57.400</span></div>
+        <div class="drow sub" data-r><span class="op">=</span><span class="nm">Margem bruta</span><span class="srcs"></span><span class="vl mono">R$ 126.800</span></div>
+        <div class="drow neg" data-r><span class="op">−</span><span class="nm">Despesas operacionais</span><span class="srcs"><span class="src cart">💳 cartão</span><span class="src banco">🏦 banco</span></span><span class="vl mono">R$ 78.300</span></div>
+        <div class="drow neg" data-r><span class="op">−</span><span class="nm">Folha</span><span class="srcs"><span class="src folha">👥 pessoas</span></span><span class="vl mono">R$ 31.200</span></div>
+        <div class="drow result" id="result"><span class="op">=</span><span class="nm">Resultado (lucro)</span><span class="srcs"></span><span class="vl mono">R$ 17.300</span></div>
+      </div>
+    </div>
+
+    <div class="ripple" id="ripple"></div>
+    <svg class="cursor" id="cursor" viewBox="0 0 24 24" fill="var(--plum-deep)" stroke="#fff" stroke-width="1.5"><path d="M4 2 L4 18 L8.5 14 L11 20 L14 18.5 L11.5 12.5 L18 12.5 Z"/></svg>
+    <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+  </div>
+</div>
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+const app=document.getElementById('app');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+function hideCap(){capEl.classList.remove('show');}
+
+const dataRows=()=>Array.from(document.querySelectorAll('.drow[data-r]'));
+const result=document.getElementById('result');
+const srcs=()=>Array.from(document.querySelectorAll('.src'));
+
+function reset(){
+  dataRows().forEach(r=>r.classList.remove('on'));
+  result.classList.remove('on');
+  srcs().forEach(s=>s.classList.remove('pulse'));
+}
+
+async function director(){
+  while(true){
+    reset(); hideCap();
+    await wait(700);
+
+    caption('E no fim, a pergunta de todo dono: deu lucro?');
+    await wait(2200);
+
+    caption('Cada lançamento já entrou classificado.');
+    for(const r of dataRows()){ r.classList.add('on'); await wait(360); }
+    await wait(500);
+
+    caption('Banco, cartão, estoque, folha: tudo cai aqui sozinho, sem você apontar nada. 📊');
+    srcs().forEach(s=>s.classList.add('pulse'));
+    await wait(2000);
+
+    caption('A DRE se monta sozinha. 💚');
+    result.classList.add('on');
+    await wait(3300);
+  }
+}
+window.addEventListener('load',()=>setTimeout(director,600));
+</script>
+</body>
+</html>

@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — Importar folha vira título</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--surface-muted:#F3EEE6;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--plum:#3D2F66;--plum-deep:#2A1F4F;
+  --gold:#E7B43B;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--success-line:#A7E8BE;--danger:#B91C1C;--danger-bg:#FEE2E2;--danger-line:#F6B9B9;
+  --inter:#FF7A00;--inter-deep:#E25C00;
+  --pess:#F59E0B;--pess-deep:#B45309;--pess-soft:#FEF6E3;--pess-line:#FCE3AE;--pess-ink:#3a2706;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;overflow:hidden}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+*{scrollbar-width:none}*::-webkit-scrollbar{width:0;height:0;display:none}
+.wrap{max-width:1080px;margin:0 auto;padding:12px 24px}
+.scene-head{margin-bottom:8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--pess-deep);padding:5px 12px;border-radius:var(--r-full);border:1px solid var(--pess-line);background:var(--pess-soft)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--pess);animation:pulse 1.8s infinite}
+.scene-title{font-family:"Anton";font-size:clamp(24px,3vw,40px);margin:8px 0 0;text-transform:uppercase;color:var(--plum)}
+.scene-title .hl{color:var(--pess-deep)}
+.scene-sub{margin:6px 0 0;max-width:760px;font-size:13.5px;color:var(--fg-2);line-height:1.45}
+.scene-sub b{color:var(--plum)}
+.appwin{position:relative;margin-top:10px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 200px);min-height:440px;max-height:710px;display:flex;flex-direction:column}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--pess) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+/* janela do app */
+.browser{flex:1;min-height:0;margin:16px;border:1px solid var(--border);border-radius:13px;overflow:hidden;display:flex;flex-direction:column;background:#fff;box-shadow:0 18px 44px -24px rgba(40,31,79,.45)}
+.bbar{display:flex;align-items:center;gap:8px;padding:9px 13px;background:var(--surface-2);border-bottom:1px solid var(--border);flex-shrink:0}
+.bbar .dot{width:9px;height:9px;border-radius:50%}.bbar .r{background:#ff5f57}.bbar .y{background:#febc2e}.bbar .g{background:#28c840}
+.bbar .url{margin-left:8px;flex:1;background:#fff;border:1px solid var(--border);border-radius:7px;padding:4px 10px;font-size:10.5px;color:var(--fg-3);font-weight:600}
+.bbody{flex:1;min-height:0;position:relative;overflow:hidden}
+.view{position:absolute;inset:0;padding:18px 22px;display:flex;flex-direction:column;opacity:0;transform:translateY(8px);transition:opacity .4s,transform .4s;pointer-events:none}
+.view.on{opacity:1;transform:none;pointer-events:auto}
+.vhd{font-size:15px;font-weight:900;color:var(--plum);display:flex;align-items:center;gap:8px}
+.vsub{font-size:11.5px;color:var(--fg-3);font-weight:600;margin-top:2px}
+
+/* import */
+.drop{margin-top:16px;border:2px dashed var(--pess-line);border-radius:14px;background:var(--pess-soft);padding:26px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:11px;transition:.3s}
+.drop.hot{border-color:var(--pess);background:#FDEFCF}
+.drop .big{font-size:34px}
+.drop .t1{font-size:13px;font-weight:800;color:var(--pess-ink)}
+.drop .t2{font-size:11px;color:var(--fg-3);font-weight:600}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;font-weight:800;font-size:12.5px;border-radius:10px;padding:9px 16px;
+  background:var(--pess-deep);color:#fff;box-shadow:0 8px 18px -10px rgba(180,83,9,.6);transition:.25s;border:none}
+.btn.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 60%,transparent),0 8px 18px -10px rgba(180,83,9,.6)}
+.filechip{margin-top:14px;display:none;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:9px 12px;align-self:center}
+.filechip.show{display:inline-flex;animation:bin .35s ease}
+@keyframes bin{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.filechip .pdf{font-size:18px}.filechip .nm{font-size:11.5px;font-weight:700;color:var(--plum)}.filechip .ok{color:var(--success);font-weight:900}
+.proc{margin-top:16px;display:none;flex-direction:column;align-items:center;gap:8px;align-self:center}
+.proc.show{display:flex;animation:bin .35s ease}
+.spin{width:30px;height:30px;border:3px solid var(--pess-line);border-top-color:var(--pess-deep);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.proc .pt{font-size:11.5px;font-weight:800;color:var(--pess-deep)}
+
+/* título */
+.vbody{flex:1;min-height:0;display:flex;gap:16px;margin-top:14px}
+.holmini{width:210px;flex-shrink:0;border:1px solid var(--border);border-radius:12px;overflow:hidden;display:flex;flex-direction:column}
+.holmini .hh{padding:8px 11px;background:var(--surface-2);border-bottom:1px solid var(--border);font-size:11px;font-weight:800;color:var(--plum)}
+.holmini .hb{flex:1;min-height:0;overflow:hidden;padding:6px 11px}
+.hrow{display:flex;justify-content:space-between;font-size:10.5px;padding:2.5px 0;border-bottom:1px dashed #efe9e0}
+.hrow .v{font-weight:800;font-variant-numeric:tabular-nums;color:var(--fg-2)}.hrow.deb .v{color:var(--danger)}
+.ratbox{flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--pess-line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.ratbox .rh{padding:9px 13px;background:linear-gradient(120deg,var(--pess-deep),#8a3f06);color:#fff;font-size:12px;font-weight:900;flex-shrink:0;display:flex;align-items:center;gap:7px}
+.ratbox .rb{flex:1;min-height:0;overflow:hidden;padding:9px 12px;display:flex;flex-direction:column;gap:4px}
+.tit-cap{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-3);margin-bottom:1px}
+.rrow{display:flex;align-items:center;gap:8px;padding:5px 9px;border-radius:9px;border:1px solid var(--border);background:#fff;opacity:0;transform:translateX(12px);transition:.3s cubic-bezier(.3,0,.2,1)}
+.rrow.show{opacity:1;transform:none}
+.rrow .pc{flex:1;min-width:0;font-size:11px;font-weight:700;color:var(--plum);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rrow .tag{font-size:8px;font-weight:800;color:var(--fg-3);background:var(--surface-muted);border-radius:var(--r-full);padding:1px 6px;flex-shrink:0}
+.rrow .vl{font-size:11.5px;font-weight:900;font-variant-numeric:tabular-nums}
+.rrow.cred{border-color:var(--success-line);background:#F4FBF6}.rrow.cred .vl{color:var(--success)}
+.rrow.deb{border-color:var(--danger-line);background:#FEF5F5}.rrow.deb .vl{color:var(--danger)}
+.ratbox .rf{flex-shrink:0;padding:9px 13px;border-top:1px solid var(--pess-line);background:var(--pess-soft);display:flex;justify-content:space-between;align-items:baseline}
+.ratbox .rf .l{font-size:11.5px;font-weight:800;color:var(--pess-ink)}
+.ratbox .rf .v{font-family:"Anton";font-size:22px;color:var(--pess-deep)}
+.donebadge{margin-top:11px;align-self:flex-start;display:inline-flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;color:var(--success);
+  background:var(--success-bg);border:1px solid var(--success-line);border-radius:var(--r-full);padding:6px 13px;opacity:0;transition:.4s}
+.donebadge.show{opacity:1}
+
+@media(max-width:860px){.vbody{flex-direction:column}.holmini{width:100%}}
+
+.cursor{position:absolute;z-index:90;left:50%;top:50%;width:22px;height:22px;pointer-events:none;transition:left .7s cubic-bezier(.5,0,.2,1),top .7s cubic-bezier(.5,0,.2,1);filter:drop-shadow(0 2px 3px rgba(40,31,79,.4))}
+.cursor.click{animation:clk .4s ease}@keyframes clk{0%,100%{transform:scale(1)}45%{transform:scale(.7)}}
+.caption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:10px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:88%;text-align:left;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--pess);flex-shrink:0;animation:pulse 1.8s infinite}
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+html.embed .browser{margin:0;border-radius:0;border:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <span class="kicker"><span class="d"></span> Pessoas · Folha (1/2) </span>
+    <h1 class="scene-title">Joga o holerite, <span class="hl">vira título sozinho.</span></h1>
+    <p class="scene-sub">Você só importa o PDF da folha. O Hub lê e <b>separa cada rubrica no seu plano de conta</b> — salário, adicional, hora extra, INSS, adiantamento, consumo — e cria a conta a pagar já líquida.</p>
+  </div>
+  <div class="appwin" id="app">
+    <div class="browser">
+      <div class="bbar"><span class="dot r"></span><span class="dot y"></span><span class="dot g"></span><span class="url">app.magiahub.tech/financeiro/folha/importar</span></div>
+      <div class="bbody">
+        <!-- IMPORT -->
+        <div class="view on" id="vImport">
+          <div class="vhd">📄 Importar folha de pagamento</div>
+          <div class="vsub">Maio/2026 · solte o contracheque em PDF</div>
+          <div class="drop" id="drop">
+            <span class="big">📄</span>
+            <div><div class="t1">Arraste o contracheque (PDF) aqui</div><div class="t2">ou clique para escolher</div></div>
+            <button class="btn" id="btnEscolher">📎 Escolher arquivo</button>
+            <div class="filechip" id="filechip"><span class="pdf">📕</span><span class="nm">Contracheque_Maio_2026.pdf</span><span class="ok">✓</span></div>
+            <button class="btn" id="btnProcessar" style="display:none;background:var(--inter);box-shadow:0 8px 18px -10px rgba(255,122,0,.6)">⚙️ Processar folha</button>
+          </div>
+          <div class="proc" id="proc"><div class="spin"></div><div class="pt">🪄 Lendo o holerite e separando os planos…</div></div>
+        </div>
+        <!-- TÍTULO -->
+        <div class="view" id="vTitulo">
+          <div class="vhd">✅ Título criado · Folha mensal</div>
+          <div class="vsub">Lucas Martins · competência 05/2026 · vence 05/06</div>
+          <div class="vbody">
+            <div class="holmini">
+              <div class="hh">📕 Holerite lido</div>
+              <div class="hb" id="holbody"></div>
+            </div>
+            <div class="ratbox">
+              <div class="rh">🧾 Rateio — cada rubrica no seu plano de conta</div>
+              <div class="rb" id="ratbody"><div class="tit-cap">Proventos (+)</div></div>
+              <div class="rf"><span class="l">Líquido a pagar</span><span class="v mono" id="liq">R$ 0,00</span></div>
+            </div>
+          </div>
+          <div class="donebadge" id="donebadge">✅ Em "A pagar" · pronto pra pagar e mandar assinar</div>
+        </div>
+      </div>
+    </div>
+    <svg class="cursor" id="cursor" viewBox="0 0 24 24" fill="var(--plum-deep)" stroke="#fff" stroke-width="1.5"><path d="M4 2 L4 18 L8.5 14 L11 20 L14 18.5 L11.5 12.5 L18 12.5 Z"/></svg>
+    <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+  </div>
+</div>
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+const app=document.getElementById('app'),cursor=document.getElementById('cursor');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+const brl=n=>'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+function rectIn(el){const a=app.getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left-a.left+r.width/2,y:r.top-a.top+r.height/2};}
+async function moveTo(el){const p=rectIn(el);cursor.style.left=(p.x-2)+'px';cursor.style.top=(p.y-2)+'px';await wait(740);}
+async function click(el){cursor.classList.add('click');el.classList.add('flash');await wait(400);cursor.classList.remove('click');setTimeout(()=>el.classList.remove('flash'),460);}
+
+// Rubricas reais (Lucas, maio/26). líquido 2.189,93.
+const PROVENTOS=[{d:'Salário Fixo',v:1705.00,p:'Salários'},{d:'Adicional Noturno',v:390.52,p:'Adicional Noturno'},{d:'Insalubridade',v:341.00,p:'Insalubridade'},{d:'Hora Extra 75%',v:312.62,p:'Horas Extras'},{d:'Repouso Remunerado',v:219.47,p:'DSR'},{d:'Hora Extra 100%',v:211.32,p:'Horas Extras'}];
+const DESCONTOS=[{d:'INSS',v:270.18,p:'INSS a Recolher'},{d:'Adiantamento',v:682.00,p:'Adiantamentos'},{d:'Consumo Funcionário',v:37.82,p:'Consumo Interno'}];
+const LIQUIDO=2189.93;
+
+const vImport=document.getElementById('vImport'),vTitulo=document.getElementById('vTitulo');
+const drop=document.getElementById('drop'),btnEscolher=document.getElementById('btnEscolher'),filechip=document.getElementById('filechip'),btnProcessar=document.getElementById('btnProcessar'),proc=document.getElementById('proc');
+const holbody=document.getElementById('holbody'),ratbody=document.getElementById('ratbody'),liqEl=document.getElementById('liq'),donebadge=document.getElementById('donebadge');
+const ratcap=ratbody.querySelector('.tit-cap');
+
+function buildHol(){
+  holbody.innerHTML='';
+  PROVENTOS.forEach(r=>{const e=document.createElement('div');e.className='hrow';e.innerHTML=`<span>${r.d}</span><span class="v">${brl(r.v)}</span>`;holbody.appendChild(e);});
+  DESCONTOS.forEach(r=>{const e=document.createElement('div');e.className='hrow deb';e.innerHTML=`<span>${r.d}</span><span class="v">− ${brl(r.v)}</span>`;holbody.appendChild(e);});
+}
+function ratRow(d,v,cred,p){const e=document.createElement('div');e.className='rrow '+(cred?'cred':'deb');e.innerHTML=`<span class="pc">${d}</span><span class="tag">${p||'plano'}</span><span class="vl">${cred?'+':'−'} ${brl(v)}</span>`;return e;}
+
+function reset(){
+  vImport.classList.add('on');vTitulo.classList.remove('on');
+  filechip.classList.remove('show');btnProcessar.style.display='none';proc.classList.remove('show');drop.classList.remove('hot');
+  buildHol();ratbody.innerHTML='';ratbody.appendChild(ratcap);ratcap.textContent='Proventos (+)';liqEl.textContent=brl(0);donebadge.classList.remove('show');
+  cursor.style.transition='none';const a=app.getBoundingClientRect();cursor.style.left=(a.width*0.5)+'px';cursor.style.top=(a.height*0.55)+'px';void cursor.offsetWidth;cursor.style.transition='';
+}
+
+async function director(){
+  while(true){
+    reset();capEl.classList.remove('show');
+    await wait(600);
+    caption('Lançar a folha rubrica por rubrica na mão? Dói. Aqui você só joga o PDF.');
+    await wait(1300);
+
+    caption('Escolhe o PDF do contracheque…');
+    await moveTo(btnEscolher);await click(btnEscolher);
+    drop.classList.add('hot');filechip.classList.add('show');
+    await wait(800);btnProcessar.style.display='inline-flex';drop.classList.remove('hot');
+    await wait(700);
+
+    caption('…e manda processar.');
+    await moveTo(btnProcessar);await click(btnProcessar);
+    btnEscolher.style.visibility='hidden';btnProcessar.style.display='none';filechip.style.display='none';proc.classList.add('show');
+    await wait(1700);
+
+    // swap pro título
+    proc.classList.remove('show');btnEscolher.style.visibility='';filechip.style.display='';
+    vImport.classList.remove('on');vTitulo.classList.add('on');
+    caption('O Hub separa cada rubrica no seu plano de conta — sozinho. 🪄');
+    await wait(700);
+    let total=0;
+    for(const r of PROVENTOS){const row=ratRow(r.d,r.v,true,r.p);ratbody.appendChild(row);void row.offsetWidth;row.classList.add('show');total+=r.v;liqEl.textContent=brl(total);ratbody.scrollTop=ratbody.scrollHeight;await wait(330);}
+    const capDeb=document.createElement('div');capDeb.className='tit-cap';capDeb.textContent='Descontos (−)';ratbody.appendChild(capDeb);await wait(200);
+    for(const r of DESCONTOS){const row=ratRow(r.d,r.v,false,r.p);ratbody.appendChild(row);void row.offsetWidth;row.classList.add('show');total-=r.v;liqEl.textContent=brl(total);ratbody.scrollTop=ratbody.scrollHeight;await wait(330);}
+    liqEl.textContent=brl(LIQUIDO);await wait(500);
+    donebadge.classList.add('show');
+    caption('Título criado já líquido — R$ 2.189,93, cada centavo no plano certo. ✅');
+    await wait(2600);
+    caption('Falta pagar e mandar o Lucas assinar — é a próxima cena. →');
+    await wait(3000);
+  }
+}
+window.addEventListener('load',()=>setTimeout(director,400));
+</script>
+</body>
+</html>

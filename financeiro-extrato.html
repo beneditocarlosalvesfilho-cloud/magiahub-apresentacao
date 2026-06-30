@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — Extrato bancário (calendário)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--surface-muted:#F3EEE6;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--violet:#9333EA;--plum:#3D2F66;--plum-deep:#2A1F4F;
+  --gold:#E7B43B;--gold-2:#f4c84b;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--warning:#A16207;--warning-bg:#FEF3C7;--danger:#B91C1C;--danger-bg:#FEE2E2;--info:#1D4ED8;
+  --fin:#16A34A;--fin-deep:#15803D;--fin-soft:#E7F6EC;--fin-line:#BBE7C8;
+  --inter:#FF7A00;--inter-soft:#FFF0E2;--inter-line:#FFD2A8;
+  --sicoob:#00AE9D;--sicoob-soft:#E1F7F4;--sicoob-line:#A8E6DE;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;overflow:hidden}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.95}
+*{scrollbar-width:none}*::-webkit-scrollbar{width:0;height:0;display:none}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 24px}
+.scene-head{margin-bottom:8px}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--fin-deep);padding:5px 12px;border-radius:var(--r-full);border:1px solid var(--fin-line);background:var(--fin-soft)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--fin);animation:pulse 1.8s infinite}
+.scene-title{font-family:"Anton";font-size:clamp(24px,3vw,40px);margin:8px 0 0;text-transform:uppercase;color:var(--plum)}
+.scene-title .hl{color:var(--fin-deep)}
+.scene-sub{margin:6px 0 0;max-width:640px;font-size:13.5px;color:var(--fg-2);line-height:1.45}
+.scene-sub b{color:var(--plum)}
+.appwin{position:relative;margin-top:10px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 200px);min-height:420px;max-height:680px;display:flex;flex-direction:column}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--fin) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+.body{flex:1;min-height:0;display:flex;flex-direction:column;padding:13px 15px;gap:10px}
+.rail{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bankchip{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:800;border-radius:var(--r-full);padding:5px 12px;border:1px solid var(--border);background:var(--surface);color:var(--fg-2)}
+.bankchip .dot{width:8px;height:8px;border-radius:50%}
+.bankchip.inter{color:#fff;background:var(--inter);border-color:var(--inter)}
+.bankchip.inter .dot{background:#fff}
+.bankchip.sicoob .dot{background:var(--sicoob)}
+.saldo{margin-left:auto;text-align:right}
+.saldo .lb{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-3)}
+.saldo .v{font-family:"Anton";font-size:23px;color:var(--fin-deep);line-height:1}
+
+.calhead{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.calhead .mes{font-weight:900;font-size:13px;color:var(--plum);display:inline-flex;align-items:center;gap:7px}
+.calhead .live{font-size:10px;font-weight:800;color:var(--success);display:inline-flex;align-items:center;gap:5px}
+.calhead .live .d{width:6px;height:6px;border-radius:50%;background:var(--success);animation:pulse 1.8s infinite}
+.calhead .tots{display:flex;gap:9px;font-size:11px;font-weight:800;margin-left:auto}
+.tots .ent{color:var(--success)}.tots .sai{color:var(--danger)}
+
+.cal{flex:1;min-height:0;display:flex;flex-direction:column;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface)}
+.wk{display:grid;grid-template-columns:repeat(7,1fr);background:var(--surface-2);border-bottom:1px solid var(--border)}
+.wk span{padding:6px 4px;text-align:center;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--fg-3)}
+.wk span.we{color:var(--inter)}
+.grid{flex:1;min-height:0;display:grid;grid-template-columns:repeat(7,1fr);grid-auto-rows:1fr}
+.day{position:relative;border-right:1px solid var(--border);border-bottom:1px solid var(--border);padding:4px 5px;display:flex;flex-direction:column;gap:2px;min-height:0;overflow:hidden;transition:box-shadow .25s,background .25s}
+.day:nth-child(7n){border-right:none}
+.day.we{background:color-mix(in srgb,var(--inter) 4%,transparent)}
+.day.empty{background:var(--surface-2)}
+.day .dn{font-size:10px;font-weight:800;color:var(--fg-2)}
+.day.we .dn{color:var(--inter)}
+.day.sel{background:color-mix(in srgb,var(--inter) 13%,transparent);box-shadow:inset 0 0 0 2px var(--inter);z-index:2}
+.mv{display:inline-flex;align-items:center;gap:2px;font-size:9px;font-weight:800;border-radius:5px;padding:1px 4px;white-space:nowrap;
+  opacity:0;transform:translateY(-3px) scale(.9);transition:all .32s cubic-bezier(.22,1,.36,1)}
+.mv.on{opacity:1;transform:none}
+.mv.in{color:var(--success);background:var(--success-bg)}
+.mv.out{color:var(--danger);background:var(--danger-bg)}
+
+/* ===== modal de detalhe do dia ===== */
+.daymodal{position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:20px;
+  background:color-mix(in srgb,var(--plum-deep) 30%,transparent);opacity:0;pointer-events:none;transition:opacity .3s}
+.daymodal.on{opacity:1}
+.dm-card{width:94%;max-width:382px;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;
+  box-shadow:0 28px 64px -22px rgba(40,31,79,.55);transform:scale(.93);transition:transform .34s cubic-bezier(.22,1,.36,1)}
+.daymodal.on .dm-card{transform:none}
+.dm-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 15px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,var(--inter-soft),transparent)}
+.dm-head .t{font-weight:900;font-size:13.5px;color:var(--plum);display:inline-flex;align-items:center;gap:7px}
+.dm-head .x{width:26px;height:26px;border-radius:8px;border:1px solid var(--border);background:var(--surface-2);color:var(--fg-3);display:flex;align-items:center;justify-content:center;font-size:12px}
+.dm-body{padding:4px 15px}
+.dm-tx{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px dashed var(--border)}
+.dm-tx:last-child{border-bottom:none}
+.dm-tx .ar{width:28px;height:28px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex-shrink:0}
+.dm-tx .ar.in{color:var(--success);background:var(--success-bg)}
+.dm-tx .ar.out{color:var(--danger);background:var(--danger-bg)}
+.dm-tx .mid{flex:1;min-width:0}
+.dm-tx .nm{font-size:12.5px;font-weight:800;color:var(--plum);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dm-tx .meta{font-size:10px;color:var(--fg-3);font-weight:700;display:inline-flex;align-items:center;gap:5px}
+.dm-tx .meta .bk{color:var(--inter);font-weight:800}
+.dm-tx .vl{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap}
+.dm-tx .vl.in{color:var(--success)}.dm-tx .vl.out{color:var(--danger)}
+.dm-foot{display:flex;align-items:center;justify-content:space-between;padding:11px 15px;border-top:1px solid var(--border);background:var(--surface-2)}
+.dm-foot .l{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--fg-3)}
+.dm-foot .v{font-family:"Anton";font-size:19px;color:var(--success)}
+
+/* ===== faixa manio.app (com foco/sincronização) ===== */
+.manio{display:flex;align-items:center;gap:9px;padding:10px 13px;border:1px dashed var(--fin-line);border-radius:12px;
+  background:var(--fin-soft);flex-wrap:wrap;opacity:0;transform:translateY(6px);transition:all .42s cubic-bezier(.22,1,.36,1)}
+.manio.on{opacity:1;transform:translateY(0);box-shadow:0 0 0 3px color-mix(in srgb,var(--fin) 26%,transparent),0 14px 30px -16px color-mix(in srgb,var(--fin) 55%,transparent)}
+.manio .lk{font-weight:900;color:var(--fin-deep);font-size:11.5px;display:inline-flex;align-items:center;gap:5px}
+.manio .banks{display:flex;gap:6px}
+.manio .ob{font-size:10px;font-weight:800;color:var(--fg-2);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-full);padding:3px 10px;transition:all .3s}
+.manio .ob.lit{color:var(--fin-deep);border-color:color-mix(in srgb,var(--fin) 45%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--fin) 16%,transparent);transform:translateY(-1px)}
+.manio .flow{display:inline-flex;gap:3px;align-items:center}
+.manio .flow i{width:5px;height:5px;border-radius:50%;background:var(--fin);opacity:.22}
+.manio.on .flow i{animation:flowdot 1.1s linear infinite}
+.manio.on .flow i:nth-child(2){animation-delay:.25s}.manio.on .flow i:nth-child(3){animation-delay:.5s}
+@keyframes flowdot{0%{opacity:.2;transform:translateX(-2px)}50%{opacity:1}100%{opacity:.2;transform:translateX(5px)}}
+.manio .hub{font-weight:900;font-size:11.5px;color:var(--fin-deep);background:var(--surface);border:1px solid var(--fin-line);border-radius:var(--r-full);padding:4px 11px}
+.manio.on .hub{animation:hubpulse 1.6s ease-in-out infinite}
+@keyframes hubpulse{0%,100%{box-shadow:0 0 0 0 color-mix(in srgb,var(--fin) 38%,transparent)}50%{box-shadow:0 0 0 7px transparent}}
+.manio .dest{font-size:10.5px;font-weight:800;color:var(--fg-3)}
+.manio .sync{margin-left:auto;font-size:10px;font-weight:800;color:var(--fin-deep);background:var(--surface);border:1px solid var(--fin-line);border-radius:var(--r-full);padding:4px 10px}
+
+.cursor{position:absolute;z-index:90;left:50%;top:50%;width:22px;height:22px;pointer-events:none;transition:left .7s cubic-bezier(.5,0,.2,1),top .7s cubic-bezier(.5,0,.2,1);filter:drop-shadow(0 2px 3px rgba(40,31,79,.4))}
+.cursor.click{animation:clk .4s ease}
+@keyframes clk{0%,100%{transform:scale(1)}45%{transform:scale(.7)}}
+.ripple{position:absolute;z-index:89;width:32px;height:32px;border-radius:50%;border:2px solid var(--inter);transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none}
+.ripple.go{animation:rip .5s ease-out}
+@keyframes rip{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}}
+.caption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:10px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:88%;text-align:left;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--fin);flex-shrink:0;animation:pulse 1.8s infinite}
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <span class="kicker"><span class="d"></span> Financeiro · Extrato bancário </span>
+    <h1 class="scene-title">Todos os bancos, <span class="hl">num extrato só.</span></h1>
+    <p class="scene-sub">O extrato do <b>Inter</b> aberto como você olha de verdade: o mês inteiro, entrada e saída dia a dia. Clique num dia pra ver tudo dele. Os outros bancos entram via <b>manio.app</b>.</p>
+  </div>
+  <div class="appwin" id="app">
+    <div class="body">
+      <div class="rail">
+        <span class="bankchip inter"><span class="dot"></span>🟠 Inter · Conta Corrente</span>
+        <span class="bankchip sicoob"><span class="dot"></span>Sicoob</span>
+        <div class="saldo"><div class="lb">Saldo Inter</div><div class="v mono">R$ 42.880,15</div></div>
+      </div>
+
+      <div class="calhead">
+        <span class="mes">📅 Junho 2026</span>
+        <span class="live"><span class="d"></span> ao vivo</span>
+        <span class="tots"><span class="ent">▲ Entradas R$ 16.350</span><span class="sai">▼ Saídas R$ 4.540</span></span>
+      </div>
+
+      <div class="cal">
+        <div class="wk"><span class="we">Dom</span><span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span class="we">Sáb</span></div>
+        <div class="grid" id="grid">
+          <!-- semana 1 -->
+          <div class="day empty we"></div>
+          <div class="day"><span class="dn">1</span><span class="mv out">▼ 320</span></div>
+          <div class="day"><span class="dn">2</span></div>
+          <div class="day"><span class="dn">3</span><span class="mv in">▲ 1,2k</span></div>
+          <div class="day"><span class="dn">4</span></div>
+          <div class="day" id="day5"><span class="dn">5</span><span class="mv out">▼ 840</span><span class="mv in">▲ 980</span></div>
+          <div class="day we"><span class="dn">6</span><span class="mv in">▲ 1,4k</span></div>
+          <!-- semana 2 -->
+          <div class="day we"><span class="dn">7</span><span class="mv in">▲ 1,2k</span></div>
+          <div class="day"><span class="dn">8</span></div>
+          <div class="day"><span class="dn">9</span><span class="mv in">▲ 760</span></div>
+          <div class="day"><span class="dn">10</span><span class="mv out">▼ 940</span></div>
+          <div class="day"><span class="dn">11</span></div>
+          <div class="day"><span class="dn">12</span><span class="mv out">▼ 1,1k</span></div>
+          <div class="day we"><span class="dn">13</span><span class="mv in">▲ 1,3k</span></div>
+          <!-- semana 3 -->
+          <div class="day we"><span class="dn">14</span><span class="mv in">▲ 1,4k</span></div>
+          <div class="day"><span class="dn">15</span><span class="mv out">▼ 410</span></div>
+          <div class="day"><span class="dn">16</span></div>
+          <div class="day"><span class="dn">17</span><span class="mv in">▲ 890</span></div>
+          <div class="day"><span class="dn">18</span><span class="mv in">▲ 1,2k</span></div>
+          <div class="day"><span class="dn">19</span></div>
+          <div class="day we"><span class="dn">20</span><span class="mv in">▲ 1,5k</span></div>
+          <!-- semana 4 -->
+          <div class="day we"><span class="dn">21</span><span class="mv in">▲ 1,1k</span></div>
+          <div class="day"><span class="dn">22</span></div>
+          <div class="day"><span class="dn">23</span><span class="mv out">▼ 230</span></div>
+          <div class="day"><span class="dn">24</span><span class="mv out">▼ 540</span></div>
+          <div class="day"><span class="dn">25</span></div>
+          <div class="day"><span class="dn">26</span><span class="mv in">▲ 720</span></div>
+          <div class="day we"><span class="dn">27</span><span class="mv in">▲ 1,6k</span></div>
+          <!-- semana 5 -->
+          <div class="day we"><span class="dn">28</span><span class="mv in">▲ 1,1k</span></div>
+          <div class="day"><span class="dn">29</span></div>
+          <div class="day"><span class="dn">30</span><span class="mv out">▼ 160</span></div>
+          <div class="day empty"></div>
+          <div class="day empty"></div>
+          <div class="day empty"></div>
+          <div class="day empty we"></div>
+        </div>
+      </div>
+
+      <div class="manio" id="manio">
+        <span class="lk">🔗 Outros bancos</span>
+        <div class="banks"><span class="ob">🟣 Nubank</span><span class="ob">🔵 Caixa</span><span class="ob">🟠 Itaú</span></div>
+        <div class="flow"><i></i><i></i><i></i></div>
+        <span class="hub">manio.app</span>
+        <div class="flow"><i></i><i></i><i></i></div>
+        <span class="dest">extrato</span>
+        <span class="sync" id="msync">🔄 sincronizando…</span>
+      </div>
+    </div>
+
+    <!-- modal de detalhe do dia -->
+    <div class="daymodal" id="daymodal">
+      <div class="dm-card">
+        <div class="dm-head">
+          <span class="t">📅 5 de junho · sexta-feira</span>
+          <span class="x">✕</span>
+        </div>
+        <div class="dm-body">
+          <div class="dm-tx">
+            <span class="ar in">▲</span>
+            <div class="mid"><div class="nm">PIX recebido — iFood</div><div class="meta"><span class="bk">🟠 Inter</span> · 14:22</div></div>
+            <span class="vl in">+ R$ 980,00</span>
+          </div>
+          <div class="dm-tx">
+            <span class="ar out">▼</span>
+            <div class="mid"><div class="nm">Boleto — Friboi Distribuidora</div><div class="meta"><span class="bk">🟠 Inter</span> · 09:10</div></div>
+            <span class="vl out">− R$ 840,00</span>
+          </div>
+        </div>
+        <div class="dm-foot"><span class="l">Saldo do dia</span><span class="v mono">+ R$ 140,00</span></div>
+      </div>
+    </div>
+
+    <div class="ripple" id="ripple"></div>
+    <svg class="cursor" id="cursor" viewBox="0 0 24 24" fill="var(--plum-deep)" stroke="#fff" stroke-width="1.5"><path d="M4 2 L4 18 L8.5 14 L11 20 L14 18.5 L11.5 12.5 L18 12.5 Z"/></svg>
+    <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+  </div>
+</div>
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+const app=document.getElementById('app'),cursor=document.getElementById('cursor'),ripple=document.getElementById('ripple');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+function hideCap(){capEl.classList.remove('show');}
+function rectIn(el){const a=app.getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left-a.left+r.width/2,y:r.top-a.top+r.height/2};}
+async function moveTo(el){if(!el)return;const p=rectIn(el);cursor.style.left=(p.x-2)+'px';cursor.style.top=(p.y-2)+'px';await wait(740);}
+async function click(el){if(!el)return;const p=rectIn(el);ripple.style.left=p.x+'px';ripple.style.top=p.y+'px';cursor.classList.add('click');ripple.classList.remove('go');void ripple.offsetWidth;ripple.classList.add('go');await wait(420);cursor.classList.remove('click');}
+
+const movs=()=>Array.from(document.querySelectorAll('#grid .mv'));
+const manio=document.getElementById('manio');
+const banks=()=>Array.from(manio.querySelectorAll('.ob'));
+const msync=document.getElementById('msync');
+const day5=document.getElementById('day5');
+const daymodal=document.getElementById('daymodal');
+
+function reset(){
+  movs().forEach(m=>m.classList.remove('on'));
+  manio.classList.remove('on');
+  banks().forEach(b=>b.classList.remove('lit'));
+  msync.textContent='🔄 sincronizando…';
+  daymodal.classList.remove('on');
+  day5.classList.remove('sel');
+}
+
+async function director(){
+  while(true){
+    reset(); hideCap();
+    cursor.style.transition='none';const a=app.getBoundingClientRect();cursor.style.left=(a.width*0.5)+'px';cursor.style.top=(a.height*0.4)+'px';void cursor.offsetWidth;cursor.style.transition='';
+    await wait(700);
+
+    caption('Extrato sempre foi cada banco no seu site, cada um diferente. Aqui é o mês inteiro, num lugar. 🟠');
+    for(const m of movs()){ m.classList.add('on'); await wait(95); }
+    await wait(900);
+
+    caption('Clica num dia e vê tudo o que rolou nele.');
+    await moveTo(day5);
+    await click(day5);
+    day5.classList.add('sel');
+    daymodal.classList.add('on');
+    await wait(3000);
+    daymodal.classList.remove('on');
+    day5.classList.remove('sel');
+    await wait(500);
+
+    caption('E os outros bancos? Sincronizam junto, via manio.app. 🔗');
+    manio.classList.add('on');
+    for(const b of banks()){ b.classList.add('lit'); await wait(320); }
+    await wait(1100);
+
+    caption('Inter, Nubank, Caixa, Itaú. Quatro bancos, um extrato só. ✨');
+    msync.textContent='✅ sincronizado';
+    await wait(2900);
+  }
+}
+window.addEventListener('load',()=>setTimeout(director,600));
+</script>
+</body>
+</html>

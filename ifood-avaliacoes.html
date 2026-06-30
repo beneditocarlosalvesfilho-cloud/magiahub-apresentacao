@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MagiaHub — iFood: avaliações</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#FBF8F2;--surface:#FEFCFA;--surface-2:#FAF7FC;--border:#ECE6F0;
+  --fg:#16121f;--fg-2:#5B5468;--fg-3:#8A8398;
+  --purple:#7C3AED;--plum:#3D2F66;--plum-deep:#2A1F4F;--gold:#E7B43B;--gold-2:#f4c84b;--ivory:#F6F1E7;--ink:#0e0b16;
+  --success:#15803D;--success-bg:#DCFCE7;--warning:#A16207;--warning-bg:#FEF3C7;--danger:#B91C1C;--info:#1D4ED8;
+  --ifood:#EA1D2C;
+  --r-card:18px;--r-full:999px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{margin:0;padding:0;overflow:hidden}
+body{font-family:"Archivo",system-ui,sans-serif;background:var(--bg);color:var(--fg);-webkit-font-smoothing:antialiased}
+.mono{font-variant-numeric:tabular-nums}
+.anton{font-family:"Anton",sans-serif;text-transform:uppercase;letter-spacing:.01em;line-height:.92}
+.wrap{max-width:1100px;margin:0 auto;padding:12px 24px}
+
+.scene-head{display:flex;flex-direction:column;gap:7px}
+.toprow{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.kicker{display:inline-flex;align-items:center;gap:8px;font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--ifood);padding:5px 12px;border-radius:var(--r-full);border:1px solid color-mix(in srgb,var(--ifood) 35%,var(--border));background:color-mix(in srgb,var(--ifood) 9%,transparent)}
+.kicker .d{width:7px;height:7px;border-radius:50%;background:var(--ifood);animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ifood) 55%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.oficial{display:inline-flex;align-items:center;gap:8px;font-size:12px;font-weight:800;color:var(--success);
+  background:var(--success-bg);border:1px solid color-mix(in srgb,var(--success) 38%,transparent);border-radius:var(--r-full);padding:6px 14px;position:relative;overflow:hidden}
+.oficial .ck{font-size:14px}
+.oficial::after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,transparent 40%,rgba(255,255,255,.5) 50%,transparent 60%);transform:translateX(-100%);animation:shine 4s ease-in-out 1.2s infinite}
+@keyframes shine{0%{transform:translateX(-100%)}45%,100%{transform:translateX(100%)}}
+.scene-title{font-family:"Anton";font-size:clamp(26px,3.4vw,46px);text-transform:uppercase;margin-top:2px}
+.scene-title .hl{color:var(--ifood)}
+.scene-sub{font-size:13.5px;color:var(--fg-2);line-height:1.45;max-width:700px}
+.scene-sub b{color:var(--plum)}
+
+.appwin{position:relative;margin-top:12px;border:1px solid var(--border);border-radius:14px;
+  background:linear-gradient(180deg,var(--surface),var(--bg));box-shadow:0 24px 60px -28px rgba(40,31,79,.30);
+  overflow:hidden;height:calc(100vh - 280px);min-height:380px;max-height:620px;display:flex;flex-direction:column}
+.panel-head{display:flex;align-items:center;gap:10px;padding:13px 18px;border-bottom:1px solid var(--border)}
+.panel-head .tt{font-weight:800;font-size:15px;color:var(--plum);display:flex;align-items:center;gap:8px}
+.panel-head .tt .e{font-size:20px}
+.reviews{flex:1;min-height:0;overflow:auto;padding:14px 18px;display:flex;flex-direction:column;gap:11px}
+.reviews::-webkit-scrollbar{display:none}
+
+.review{padding:13px 15px;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:0 4px 12px rgba(40,31,79,.05)}
+.rhead{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:7px}
+.stars{letter-spacing:1px;font-size:15px;color:var(--gold)}
+.stars .off{color:var(--fg-3);opacity:.45}
+.rname{font-weight:700;font-size:13px}
+.rmeta{font-size:11px;color:var(--fg-3)}
+.rbadge{margin-left:auto;font-size:10.5px;font-weight:800;padding:3px 10px;border-radius:var(--r-full);display:inline-flex;align-items:center;gap:5px}
+.rbadge.prazo{background:var(--warning-bg);color:var(--warning)}
+.rbadge.urgente{background:color-mix(in srgb,var(--danger) 14%,transparent);color:var(--danger);animation:blink 1.4s steps(1) infinite}
+@keyframes blink{50%{opacity:.5}}
+.rbadge.ok{background:var(--success-bg);color:var(--success)}
+.rcomment{font-size:13px;line-height:1.5;color:var(--fg)}
+
+.rbtn{margin-top:10px;display:inline-flex;align-items:center;gap:7px;font-weight:800;font-size:12.5px;border:none;border-radius:10px;padding:8px 15px;cursor:pointer;background:var(--ifood);color:#fff;font-family:inherit}
+.rbtn.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 55%,transparent)}
+.replybox{margin-top:10px;display:none}
+.replybox.on{display:block}
+.ta{min-height:62px;border:1px solid color-mix(in srgb,var(--ifood) 35%,transparent);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--fg);background:var(--surface-2);line-height:1.45}
+.ta .cur{color:var(--ifood);animation:cur .8s steps(1) infinite}
+@keyframes cur{50%{opacity:0}}
+.ractions{display:flex;align-items:center;gap:8px;margin-top:8px}
+.rcount{font-size:11px;color:var(--fg-3)}
+.rsend{margin-left:auto;font-weight:800;font-size:11.5px;border:none;border-radius:10px;padding:7px 15px;background:var(--ifood);color:#fff;cursor:pointer;font-family:inherit}
+.rsend.flash{box-shadow:0 0 0 3px color-mix(in srgb,var(--gold) 55%,transparent)}
+
+.myreply{margin-top:10px;padding:10px 12px;border-radius:10px;background:var(--surface-2);border:1px solid color-mix(in srgb,var(--info) 28%,transparent);display:none}
+.myreply.on{display:block;animation:rin .4s ease}
+@keyframes rin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.myreply .lbl{font-size:10px;font-weight:800;color:var(--info);letter-spacing:.04em;margin-bottom:4px}
+.myreply .txt{font-size:12.5px;line-height:1.5;color:var(--fg)}
+
+/* cursor + caption */
+.cursor{position:absolute;z-index:90;left:50%;top:50%;width:22px;height:22px;pointer-events:none;
+  transition:left .7s cubic-bezier(.5,0,.2,1),top .7s cubic-bezier(.5,0,.2,1);filter:drop-shadow(0 2px 3px rgba(40,31,79,.4))}
+.cursor.click{animation:clk .4s ease}
+@keyframes clk{0%,100%{transform:scale(1)}45%{transform:scale(.7)}}
+.ripple{position:absolute;z-index:89;width:32px;height:32px;border-radius:50%;border:2px solid var(--gold);transform:translate(-50%,-50%) scale(.2);opacity:0;pointer-events:none}
+.ripple.go{animation:rip .5s ease-out}
+@keyframes rip{0%{opacity:.8;transform:translate(-50%,-50%) scale(.2)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.35)}}
+.caption{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);z-index:92;display:flex;align-items:center;gap:9px;
+  background:var(--plum-deep);color:var(--ivory);font-size:13px;font-weight:600;padding:10px 17px;border-radius:var(--r-full);
+  box-shadow:0 12px 30px -8px rgba(40,31,79,.6);max-width:88%;opacity:0;transition:opacity .35s}
+.caption.show{opacity:1}
+.caption .n{width:7px;height:7px;border-radius:50%;background:var(--ifood);flex-shrink:0;animation:pulse 1.8s infinite}
+html.embed .scene-head{display:none}
+html.embed .wrap{padding:0;max-width:none}
+html.embed .appwin{height:100vh;max-height:none;min-height:0;margin-top:0;border-radius:0;border:0;box-shadow:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="scene-head">
+    <div class="toprow">
+      <span class="kicker"><span class="d"></span> iFood · avaliações</span>
+      <span class="oficial"><span class="ck">✓</span> Integração OFICIAL com a API do iFood · homologação aprovada</span>
+    </div>
+    <h1 class="scene-title">Avaliação respondida. <span class="hl">No prazo.</span></h1>
+    <p class="scene-sub">Avaliação parada é <b>cliente que não volta</b> — e some em 5 dias. No app você responde uma por uma; no Hub, <b>todas num lugar só</b>, sem perder o prazo.</p>
+  </div>
+
+  <div class="appwin" id="app">
+    <div class="panel-head">
+      <span class="tt"><span class="e">⭐</span> Avaliações do iFood</span>
+    </div>
+    <div class="reviews" id="reviews"></div>
+
+    <div class="ripple" id="ripple"></div>
+    <svg class="cursor" id="cursor" viewBox="0 0 24 24" fill="var(--plum-deep)" stroke="#fff" stroke-width="1.5"><path d="M4 2 L4 18 L8.5 14 L11 20 L14 18.5 L11.5 12.5 L18 12.5 Z"/></svg>
+    <div class="caption" id="caption"><span class="n"></span><span id="cap-txt"></span></div>
+  </div>
+</div>
+
+<script>
+if(location.search.indexOf('embed')>=0)document.documentElement.classList.add('embed');
+function stars(n){let s='';for(let i=1;i<=5;i++)s+=i<=n?'★':'<span class="off">★</span>';return s;}
+const REVIEWS=[
+  {score:5,nome:'Mariana A.',meta:'Mage Vitória · hoje 19:04',comment:'Hambúrguer perfeito e a entrega foi rapidíssima! 😍',badge:'prazo',badgeTxt:'2 dias pra responder'},
+  {score:4,nome:'Carlos M.',meta:'Mage Praia do Canto · ontem',comment:'Muito bom, só demorou um pouquinho.',badge:'prazo',badgeTxt:'4 dias pra responder'},
+  {score:3,nome:'João V.',meta:'Mage Vila Velha · há 4 dias',comment:'Faltou o molho que pedi 😕',badge:'urgente',badgeTxt:'⏳ Expirando',demo:true},
+  {score:5,nome:'Bruna L.',meta:'Mage Serra · há 2 dias',comment:'Melhor hambúrguer da cidade! ❤️',badge:'ok',badgeTxt:'✓ Respondida',answered:'Que alegria, Bruna! 🙏 Obrigado, volte sempre!'},
+];
+const host=document.getElementById('reviews');
+function render(){
+  host.innerHTML=REVIEWS.map((r,i)=>`
+    <div class="review" data-i="${i}">
+      <div class="rhead">
+        <span class="stars">${stars(r.score)}</span>
+        <span class="rname">${r.nome}</span>
+        <span class="rmeta">${r.meta}</span>
+        <span class="rbadge ${r.badge}" data-badge="${i}">${r.badgeTxt}</span>
+      </div>
+      <div class="rcomment">${r.comment}</div>
+      ${r.demo?`
+        <button class="rbtn" data-resp="${i}">↩️ Responder</button>
+        <div class="replybox" data-box="${i}">
+          <div class="ta"><span data-typed="${i}"></span><span class="cur">▍</span></div>
+          <div class="ractions"><span class="rcount" data-count="${i}">0 / 300 (mín 10)</span><button class="rsend" data-send="${i}">Enviar resposta</button></div>
+        </div>`:''}
+      <div class="myreply ${r.answered?'on':''}" data-reply="${i}">
+        <div class="lbl">SUA RESPOSTA</div>
+        <div class="txt" data-replytxt="${i}">${r.answered??''}</div>
+      </div>
+    </div>`).join('');
+}
+render();
+
+const app=document.getElementById('app'),cursor=document.getElementById('cursor'),ripple=document.getElementById('ripple');
+const capEl=document.getElementById('caption'),capTxt=document.getElementById('cap-txt');
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+function caption(t){capTxt.textContent=t;capEl.classList.add('show');}
+function rectIn(el){const a=app.getBoundingClientRect(),r=el.getBoundingClientRect();return{x:r.left-a.left+r.width/2,y:r.top-a.top+r.height/2};}
+async function moveTo(el){if(!el)return;const p=rectIn(el);cursor.style.left=(p.x-2)+'px';cursor.style.top=(p.y-2)+'px';await wait(740);}
+async function click(el){if(!el)return;const p=rectIn(el);ripple.style.left=p.x+'px';ripple.style.top=p.y+'px';cursor.classList.add('click');ripple.classList.remove('go');void ripple.offsetWidth;ripple.classList.add('go');el.classList.add('flash');await wait(420);cursor.classList.remove('click');setTimeout(()=>el.classList.remove('flash'),500);}
+async function type(el,txt,counter){
+  for(let i=1;i<=txt.length;i++){el.textContent=txt.slice(0,i);if(counter)counter.textContent=`${i} / 300 (mín 10)`;await wait(34);}
+}
+
+async function director(){
+  while(true){
+    render();capEl.classList.remove('show');
+    cursor.style.transition='none';const a=app.getBoundingClientRect();cursor.style.left=(a.width*0.5)+'px';cursor.style.top=(a.height*0.35)+'px';void cursor.offsetWidth;cursor.style.transition='';
+    await wait(700);
+
+    caption('As avaliações de todas as lojas, num lugar só. Chega de catar uma por uma no app.');
+    await wait(2300);
+
+    caption('Avaliação parada é cliente que não volta. E o prazo? Some em 5 dias.');
+    await wait(2300);
+
+    caption('Aquela nota 3 estrelas prestes a expirar? Você responde aqui e reverte. ✍️');
+    const btn=document.querySelector('[data-resp="2"]');await moveTo(btn);await click(btn);
+    document.querySelector('[data-box="2"]').classList.add('on');btn.style.display='none';
+    await wait(500);
+    const ta=document.querySelector('[data-typed="2"]'),cnt=document.querySelector('[data-count="2"]');
+    await type(ta,'Poxa, João, foi mal pelo molho! 🙏 Já avisei a cozinha. Chama a gente que compensa no próximo. 🍔',cnt);
+    await wait(700);
+
+    const send=document.querySelector('[data-send="2"]');await moveTo(send);await click(send);
+    await wait(300);
+    document.querySelector('[data-box="2"]').classList.remove('on');
+    document.querySelector('[data-replytxt="2"]').textContent='Poxa, João, foi mal pelo molho! 🙏 Já avisei a cozinha. Chama a gente que compensa no próximo. 🍔';
+    document.querySelector('[data-reply="2"]').classList.add('on');
+    const bd=document.querySelector('[data-badge="2"]');bd.className='rbadge ok';bd.textContent='✓ Respondida';
+    caption('Respondida no prazo! ✅ Cliente insatisfeito virou cliente que volta.');
+    await wait(3000);
+  }
+}
+window.addEventListener('load',()=>setTimeout(director,600));
+</script>
+</body>
+</html>
